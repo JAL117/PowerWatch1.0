@@ -1,11 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
+import Swal from "sweetalert2";
 import powerWatchImage from "../../Img/MonitorDeEnergia.png";
 import { IoCartOutline } from "react-icons/io5";
 import { MdKeyboardArrowRight } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 const PowerWatch = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const handleContratarClick = () => {
+    if (!isLoggedIn) {
+      Swal.fire({
+        icon: "info",
+        title: "¡Atención!",
+        text: "Necesitas iniciar sesión para comprar el producto.",
+        confirmButtonText: "Entendido",
+      });
+    }
+  };
+
   return (
     <Container
       style={{
@@ -42,10 +56,19 @@ const PowerWatch = () => {
           />
         </Col>
         <Col md={5} className="text-center">
-          <Button variant="warning" className="mx-1 my-1 btn-lg">
-            Contratar <IoCartOutline size={30} />
+          <Button
+            variant="warning"
+            className="mx-1 my-1 btn-lg"
+            onClick={handleContratarClick}
+          >
+            Comprar <IoCartOutline size={30} />
           </Button>
-          <Button variant="primary" className="mx-1 my-1 btn-lg" as={Link} to="/instrucciones">
+          <Button
+            variant="primary"
+            className="mx-1 my-1 btn-lg"
+            as={Link}
+            to="/instrucciones"
+          >
             Saber más <MdKeyboardArrowRight size={30} />
           </Button>
         </Col>
