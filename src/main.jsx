@@ -8,6 +8,8 @@ import Login from "./Pages/Login";
 import Home from "./Pages/Home";
 import Panel from "./Pages/Panel";
 import Instrucciones from "./Pages/Instrucciones";
+import RecuperarContraseña from "./Pages/RecuperarContraseña";
+
 
 const router = createBrowserRouter([
   {
@@ -41,6 +43,10 @@ const router = createBrowserRouter([
     path: "/Login",
     element: <Login />,
   },
+  {
+    path:"/RecuperacionDeContraseña",
+    element:<RecuperarContraseña/>
+  }
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

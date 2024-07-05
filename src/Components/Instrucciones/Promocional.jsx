@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 const Promocional = () => {
     return (
         <div>
-            <div className="p-5 rounded">
+            <div className="rounded" style={{padding:"100px"}}>
                 <h1 className="text-center mb-4 mt-5" style={{fontSize:"clamp(1rem , 5vw , 5rem)" , color:"orange"}}>¡Descubre "PowerWatch v1"!</h1>
                 <p className="text-center mb-5 mt-5" style={{fontSize:"clamp(1rem , 5vw , 2.5rem)"}} >
                     ¡Lleva el control total de tu energía con PowerWatch v1! Nuestro software de monitoreo y alerta temprana, diseñado especialmente para la industria, te brinda todas las herramientas que necesitas para mantener tu operación sin interrupciones y optimizar tu consumo energético.
