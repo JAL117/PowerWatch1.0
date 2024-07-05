@@ -3,8 +3,8 @@ import NavbarHome from '../Components/Home/NavbarHome';
 import Header from '../Components/Home/Header';
 import Features from '../Components/Home/Features';
 import PowerWatch from '../Components/Home/PowerWatch';
-import BottomSection from '../Components/Home/BottomSection';
 import Animaciones from '../Components/common/animaciones';
+import Footer from '../Components/Home/Footer';
 
 const Home = () => {
   return (
@@ -15,7 +15,7 @@ const Home = () => {
       <Header />
       <Features />
       <PowerWatch />
-      <BottomSection />
+      <Footer/>
     </Animaciones>
     </div>
    

@@ -7,6 +7,9 @@ import { RiLock2Fill } from "react-icons/ri";
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { Link } from 'react-router-dom';
+
+
 
 const MySwal = withReactContent(Swal);
 
@@ -61,7 +64,7 @@ function FormularioLogin() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             size="lg"
-            style={{ height: '70px', fontSize: '1rem' }}
+            style={{ height: '20px'}}
           />
         </Form.Group>
         <Form.Group className="mb-4" controlId="formBasicPassword">
@@ -72,11 +75,11 @@ function FormularioLogin() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             size="lg"
-            style={{ height: '70px', fontSize: '1rem' }}
+            style={{ height: '20px' }}
           />
         </Form.Group>
         <div className="d-flex justify-content-center">
-          <Button type="submit" variant="dark" style={{ backgroundColor: "#00126E", width: '70%', fontSize: '20pt', padding: '1rem' }}>
+          <Button type="submit" variant="dark" as={Link} to="/AreaCliente" style={{ backgroundColor: "#00126E", width: '70%', fontSize: '20pt', padding: '1rem' }}>
             Aceptar
           </Button>
         </div>
