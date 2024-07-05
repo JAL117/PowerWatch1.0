@@ -3,12 +3,13 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 import powerWatchImage from "../../Img/MonitorDeEnergia.png";
 import { IoCartOutline } from "react-icons/io5";
 import { MdKeyboardArrowRight } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 const PowerWatch = () => {
   return (
     <Container
       style={{
-        backgroundColor: "#00126E",
+        backgroundColor: "orange",
         padding: "1%",
         borderRadius: "35px",
         marginTop: "10%",
@@ -44,7 +45,7 @@ const PowerWatch = () => {
           <Button variant="warning" className="mx-1 my-1 btn-lg">
             Contratar <IoCartOutline size={30} />
           </Button>
-          <Button variant="primary" className="mx-1 my-1 btn-lg">
+          <Button variant="primary" className="mx-1 my-1 btn-lg" as={Link} to="/instrucciones">
             Saber más <MdKeyboardArrowRight size={30} />
           </Button>
         </Col>
