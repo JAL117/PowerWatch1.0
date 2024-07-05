@@ -33,8 +33,8 @@ const CardGrid = () => {
 
   return (
 
-    <div className="mt-4">
-        <p style={{textAlign:"center", fontSize:"clamp(1rem , 5vw , 3rem)" , fontWeight:"600"}}>Instrucciones</p>
+    <div>
+        <p style={{textAlign:"center", fontSize:"clamp(1rem , 5vw , 3rem)" , fontWeight:"600" , color:"orange"}}>Instrucciones</p>
           <div className="d-flex justify-content-center align-items-center mt-5">
       <Container>
         <Row className="justify-content-center">

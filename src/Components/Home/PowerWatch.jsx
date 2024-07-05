@@ -7,19 +7,7 @@ import { MdKeyboardArrowRight } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 const PowerWatch = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const handleContratarClick = () => {
-    if (!isLoggedIn) {
-      Swal.fire({
-        icon: "info",
-        title: "¡Atención!",
-        text: "Necesitas iniciar sesión para comprar el producto.",
-        confirmButtonText: "Entendido",
-      });
-    }
-  };
-
+ 
   return (
     <Container
       style={{
@@ -27,18 +15,19 @@ const PowerWatch = () => {
         padding: "1%",
         borderRadius: "35px",
         marginTop: "10%",
+
       }}
     >
       <h2
         className="text-center"
-        style={{ fontSize: "clamp(2rem, 5vw, 5rem)", color: "#ffff" }}
+        style={{ fontSize: "clamp(2rem, 5vw, 4rem)", color: "#ffff" }}
       >
         PowerWatch 2.0
       </h2>
       <p
         className="text-center"
         style={{
-          fontSize: "clamp(1rem , 5vw , 3.2rem)",
+          fontSize: "clamp(1rem , 5vw , 2rem)",
           padding: "5px",
           color: "#ffff",
         }}
@@ -47,7 +36,7 @@ const PowerWatch = () => {
         ¡Inicie su servicio hoy mismo!
       </p>
       <Row className="justify-content-center align-items-center">
-        <Col md={5}>
+        <Col md={3}>
           <img
             src={powerWatchImage}
             alt="PowerWatch"
@@ -55,11 +44,13 @@ const PowerWatch = () => {
             style={{ width: "100%", maxWidth: "60vh" }}
           />
         </Col>
-        <Col md={5} className="text-center">
+        <Col md={3} className="text-center">
           <Button
             variant="warning"
             className="mx-1 my-1 btn-lg"
-            onClick={handleContratarClick}
+            as={Link}
+            to="/Login"
+            style={{color:"#ffff"}}
           >
             Comprar <IoCartOutline size={30} />
           </Button>
