@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar, Nav, Container, Button, Offcanvas, Form } from "react-bootstrap";
 import { FaChartBar, FaBalanceScale, FaBars, FaUser, FaSignOutAlt } from "react-icons/fa";
 import { HiDocumentDownload } from "react-icons/hi";
 import styled from 'styled-components';
 import img from "../../Img/Logo.png"
 import { Link } from 'react-router-dom';
+import { PiSubtitlesFill } from "react-icons/pi";
 
 const TopNavbar = styled(Navbar)`
   background-color: #00126E;
-  padding: 10px 20px;
+  padding: 10px 25px;
   position: fixed;
   top: 0;
   left: 0;
@@ -20,27 +21,29 @@ const SidebarContainer = styled.div`
   background: linear-gradient(180deg, #00126E 0%, #001E9C 100%);
   color: white;
   height: calc(100vh - 56px);
-  width: ${props => props.isExpanded ? '250px' : '70px'};
+  width: ${props => props.isExpanded ? '250px' : '80px'};
   position: fixed;
-  top: 56px;
+  top: 100px;
   left: 0;
   transition: all 0.3s ease;
   overflow-x: hidden;
   z-index: 1020;
 
   @media (max-width: 768px) {
-    width: ${props => props.isExpanded ? '250px' : '70px'};
+    width: ${props => props.isExpanded ? '250px' : '0'};
+    left: ${props => props.isExpanded ? '0' : '-70px'};
   }
 `;
 
 const LogoContainer = styled.div`
-  padding: 10px;
+  padding: 0px;
   text-align: center;
 `;
 
 const Logo = styled.img`
   max-width: ${props => props.isExpanded ? '60%' : '90%'};
   height: auto;
+  margin-top:10px;
   transition: max-width 0.3s ease;
 `;
 
@@ -139,14 +142,32 @@ const StyledForm = styled(Form)`
   }
 `;
 
-const Layout = () => {
+const SideBar = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
 
-  const toggleSidebar = () => setSidebarExpanded(!sidebarExpanded);
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Comprueba el tamaño inicial
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    setSidebarExpanded(!sidebarExpanded);
+    if (isMobile) {
+      document.body.style.overflow = sidebarExpanded ? 'auto' : 'hidden';
+    }
+  };
+
   const handleOffcanvasClose = () => setShowOffcanvas(false);
   const handleOffcanvasShow = () => setShowOffcanvas(true);
 
@@ -171,7 +192,7 @@ const Layout = () => {
           <ToggleButton onClick={toggleSidebar}>
             <FaBars />
           </ToggleButton>
-          <Navbar.Brand href="/" style={{fontSize:"clamp(1.5rem , 5vw , 3rem)" , marginLeft:"20px"}}> PowerWatch </Navbar.Brand>
+          <Navbar.Brand href="/AreaCliente" style={{fontSize:"clamp(1.5rem , 5vw , 3rem)" , marginLeft:"20px"}}> PowerWatch </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
@@ -183,25 +204,44 @@ const Layout = () => {
       </TopNavbar>
 
       <SidebarContainer isExpanded={sidebarExpanded}>
-        <LogoContainer className='mt-5'>
+        <LogoContainer className='mt-5' as={Link} to="/AreaCliente">
           <Logo src={img} alt="Logo" isExpanded={sidebarExpanded} />
         </LogoContainer>
 
         <StyledNav className="flex-column p-3">
-          <StyledButton isExpanded={sidebarExpanded}>
+          <StyledButton isExpanded={sidebarExpanded} as={Link} to="/AreaCliente/Graficas">
             <FaChartBar />
             <ButtonText isExpanded={sidebarExpanded}>Gráficas</ButtonText>
           </StyledButton>
-          <StyledButton isExpanded={sidebarExpanded}>
+          <StyledButton isExpanded={sidebarExpanded} as={Link} to="/AreaCliente/Comparativa">
             <FaBalanceScale />
             <ButtonText isExpanded={sidebarExpanded}>Comparativas</ButtonText>
           </StyledButton>
-          <StyledButton isExpanded={sidebarExpanded}>
+          <StyledButton isExpanded={sidebarExpanded} as={Link} to="/AreaCliente/Reportes">
             <HiDocumentDownload />
             <ButtonText isExpanded={sidebarExpanded}>Reportes</ButtonText>
           </StyledButton>
+          <StyledButton isExpanded={sidebarExpanded} as={Link} to="/AreaCliente/Planes">
+            <PiSubtitlesFill />
+            <ButtonText isExpanded={sidebarExpanded}>Planes</ButtonText>
+          </StyledButton>
         </StyledNav>
       </SidebarContainer>
+
+      {isMobile && sidebarExpanded && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 1010
+          }}
+          onClick={toggleSidebar}
+        />
+      )}
 
       <StyledOffcanvas show={showOffcanvas} onHide={handleOffcanvasClose} placement="end">
         <Offcanvas.Header closeButton>
@@ -251,4 +291,4 @@ const Layout = () => {
   );
 }
 
-export default Layout;
+export default SideBar;
