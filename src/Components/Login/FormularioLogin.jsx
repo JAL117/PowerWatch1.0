@@ -8,11 +8,16 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { Link } from "react-router-dom";
+import { IoMdArrowRoundBack } from "react-icons/io";
+import { FaUsers, FaUserPlus, FaPhone } from "react-icons/fa";
+import { MdOutlineDriveFileRenameOutline, MdEmail } from "react-icons/md";
+import { RiLockPasswordFill } from "react-icons/ri";
 
 const MySwal = withReactContent(Swal);
 
 function FormularioLogin() {
-  const [showModalR, setShowModalR] = useState(false);
+  const [showModalRegister, setShowModalRegister] = useState(false);
+  const [showModalForgotPassword, setShowModalForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     lastName: "",
@@ -22,9 +27,9 @@ function FormularioLogin() {
     confirmPassword: "",
   });
 
-  const handleShow = () => setShowModalR(true);
-  const handleClose = () => {
-    setShowModalR(false);
+  const handleShowRegister = () => setShowModalRegister(true);
+  const handleCloseRegister = () => {
+    setShowModalRegister(false);
     setFormData({
       name: "",
       lastName: "",
@@ -35,6 +40,9 @@ function FormularioLogin() {
     });
   };
 
+  const handleShowForgotPassword = () => setShowModalForgotPassword(true);
+  const handleCloseForgotPassword = () => setShowModalForgotPassword(false);
+
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
@@ -42,7 +50,7 @@ function FormularioLogin() {
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    handleClose();
+    handleCloseRegister();
 
     try {
       const response = await axios.post("URL_DE_TU_API/registro", formData);
@@ -56,7 +64,6 @@ function FormularioLogin() {
     }
   };
 
-  const [showModal, setShowModal] = useState(false); // Estado para controlar la visibilidad del modal
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -75,14 +82,6 @@ function FormularioLogin() {
     }
   };
 
-  const handleForgotPassword = () => {
-    setShowModal(true); // Muestra el modal al hacer clic en "¿Ha olvidado su contraseña?"
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false); // Cierra el modal
-  };
-
   const handleSendEmail = () => {
     axios
       .post("URL_DE_TU_API/forgot-password", { email })
@@ -92,11 +91,68 @@ function FormularioLogin() {
           "Revisa tu bandeja de entrada para más instrucciones",
           "success"
         );
-        setShowModal(false); // Cierra el modal después de enviar el correo
+        setShowModalForgotPassword(false); // Cierra el modal después de enviar el correo
       })
       .catch((error) => {
         MySwal.fire("Error", "No se pudo enviar el correo", "error");
       });
+  };
+
+  const styles = {
+    navbar: {
+      background: 'linear-gradient(45deg, #00126E, #001F9C)',
+      padding: '0.5rem 1rem',
+    },
+    brand: {
+      fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
+      fontWeight: '600',
+      color: '#ffffff',
+      display: 'flex',
+      alignItems: 'center',
+    },
+    logo: {
+      width: '60px',
+      height: '60px',
+      marginRight: '10px',
+    },
+    navButton: {
+      borderRadius: '10px',
+      padding: '0.5rem 1rem',
+      fontSize: '0.9rem',
+      fontWeight: '600',
+      transition: 'all 0.3s ease',
+    },
+    modal: {
+      header: {
+        background: 'linear-gradient(45deg, #FFB800, #FFA000)',
+        border: 'none',
+      },
+      title: {
+        color: '#ffffff',
+        fontSize: '1.5rem',
+        fontWeight: '700',
+      },
+      body: {
+        background: 'linear-gradient(45deg, #001F9C, #00126E)',
+        color: '#ffffff',
+        padding: '2rem',
+      },
+      input: {
+        borderRadius: '10px',
+        border: 'none',
+        padding: '0.75rem',
+        marginBottom: '1rem',
+      },
+      submitButton: {
+        background: 'linear-gradient(45deg, #FFB800, #FFA000)',
+        border: 'none',
+        borderRadius: '20px',
+        padding: '0.75rem 2rem',
+        fontSize: '1rem',
+        fontWeight: '600',
+        transition: 'all 0.3s ease',
+      },
+    },
   };
 
   return (
@@ -104,6 +160,16 @@ function FormularioLogin() {
       className="d-flex flex-column align-items-center"
       style={{ width: "90%", padding: "0.5rem", color: "#ffff" }}
     >
+      <Button
+        variant="outline-light"
+        as={Link}
+        to="/"
+        className="align-self-start m-3"
+        style={{ border: "none" }}
+      >
+        <IoMdArrowRoundBack size={30} />
+      </Button>
+
       <h1
         className="mb-4"
         style={{ color: "#ffff", fontSize: "clamp(2rem , 5vw, 4rem)" }}
@@ -156,15 +222,13 @@ function FormularioLogin() {
       </Form>
 
       {/* Modal para recuperar contraseña */}
-      <Modal show={showModal} onHide={handleCloseModal}  size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered>
-        <Modal.Header closeButton  style={{ backgroundColor: "#FFB800", textAlign: "center" }}>
-          <Modal.Title>Recuperar Contraseña</Modal.Title>
+      <Modal show={showModalForgotPassword} onHide={handleCloseForgotPassword} size="lg" centered>
+        <Modal.Header closeButton style={{ backgroundColor: "#FFB800", textAlign: "center" }}>
+          <Modal.Title style={{color:"#ffff"}}>Recuperar Contraseña</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ backgroundColor: "#00126E", color: "white", padding: "5%", fontSize: "15pt" }}>
           <Form.Group controlId="formBasicEmailModal">
-            <Form.Label>Ingrese su email</Form.Label>
+            <Form.Label> <MdEmail /> Ingrese su email</Form.Label>
             <Form.Control
               type="email"
               placeholder="Email"
@@ -174,7 +238,7 @@ function FormularioLogin() {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer style={{ backgroundColor: "#00126E", color: "white", padding: "5%", fontSize: "15pt" }}>
-          <Button variant="secondary" onClick={handleCloseModal}>
+          <Button variant="secondary" onClick={handleCloseForgotPassword}>
             Cancelar
           </Button>
           <Button variant="warning" onClick={handleSendEmail} disabled={!email}>
@@ -184,82 +248,35 @@ function FormularioLogin() {
       </Modal>
 
       {/* Modal para registro */}
-      <Modal
-        show={showModalR}
-        onHide={handleClose}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Header
-          closeButton
-          style={{ backgroundColor: "#FFB800", textAlign: "center" }}
-        >
-          <Modal.Title>Registro de Cliente</Modal.Title>
+      <Modal show={showModalRegister} onHide={handleCloseRegister} centered size="lg">
+        <Modal.Header closeButton style={styles.modal.header}>
+          <Modal.Title style={styles.modal.title}>
+            <FaUserPlus /> Registro de Cliente
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ backgroundColor: "#00126E", color: "white", padding: "5%", fontSize: "15pt" }}>
+        <Modal.Body style={styles.modal.body}>
           <Form onSubmit={handleRegisterSubmit}>
-            <Form.Group controlId="name">
-              <Form.Label>Nombres</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Ingrese sus nombres"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group controlId="lastName" className="mt-2">
-              <Form.Label>Apellidos</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Ingrese sus apellidos"
-                value={formData.lastName}
-                onChange={handleInputChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group controlId="phone" className="mt-3">
-              <Form.Label>Teléfono</Form.Label>
-              <Form.Control
-                type="tel"
-                placeholder="Ingrese su teléfono"
-                value={formData.phone}
-                onChange={handleInputChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group controlId="email" className="mt-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Ingrese su email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group controlId="password" className="mt-3">
-              <Form.Label>Contraseña</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Ingrese su contraseña"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group controlId="confirmPassword" className="mt-3">
-              <Form.Label>Confirmar Contraseña</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Confirme su contraseña"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                required
-              />
-            </Form.Group>
-            <Button variant="warning" type="submit" className="mt-3" style={{ display: "block", margin: "0 auto", fontSize: "15pt" }}>
+            {[
+              { id: "name", label: "Nombres", icon: <MdOutlineDriveFileRenameOutline /> },
+              { id: "lastName", label: "Apellidos", icon: <MdOutlineDriveFileRenameOutline /> },
+              { id: "phone", label: "Teléfono", icon: <FaPhone /> },
+              { id: "email", label: "Email", icon: <MdEmail /> },
+              { id: "password", label: "Contraseña", icon: <RiLockPasswordFill />, type: "password" },
+              { id: "confirmPassword", label: "Confirmar Contraseña", icon: <RiLockPasswordFill />, type: "password" },
+            ].map((field) => (
+              <Form.Group key={field.id} controlId={field.id}>
+                <Form.Label>{field.icon} {field.label}</Form.Label>
+                <Form.Control
+                  type={field.type || "text"}
+                  placeholder={`Ingrese ${field.label.toLowerCase()}`}
+                  value={formData[field.id]}
+                  onChange={handleInputChange}
+                  required
+                  style={styles.modal.input}
+                />
+              </Form.Group>
+            ))}
+            <Button type="submit" style={styles.modal.submitButton}>
               Registrarse
             </Button>
           </Form>
@@ -271,7 +288,7 @@ function FormularioLogin() {
           className="mt-3 mr-3"
           variant="link"
           style={{ color: "#ffff", fontSize: "1rem" }}
-          onClick={handleShow} // Mostrar el modal de registro
+          onClick={handleShowRegister} // Mostrar el modal de registro
         >
           Registrarse
         </Button>
@@ -279,7 +296,7 @@ function FormularioLogin() {
           className="mt-3"
           variant="link"
           style={{ color: "#ffff", fontSize: "1rem" }}
-          onClick={handleForgotPassword}
+          onClick={handleShowForgotPassword}
         >
           ¿Ha olvidado su contraseña?
         </Button>
