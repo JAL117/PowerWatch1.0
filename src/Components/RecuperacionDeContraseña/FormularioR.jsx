@@ -13,8 +13,7 @@ const FormularioR = () => {
   const [showForm, setShowForm] = useState(true); 
  
 
-
-
+console.log(token,email);
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -22,15 +21,12 @@ const FormularioR = () => {
       showErrorAlert("Las contraseñas no coinciden");
       return;
     }
-
-    showSuccessAlert("Token y email validados correctamente");
-
-    const response = await fetch("/api/reset-password", {
-      method: "POST",
+    const response = await fetch("http://3.226.18.117/user/passrecover", {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ token, email, password }),
+      body: JSON.stringify({email:email,passnew:password }),
     });
 
     if (response.ok) {

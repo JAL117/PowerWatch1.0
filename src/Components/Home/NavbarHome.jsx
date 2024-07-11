@@ -5,6 +5,7 @@ import { FaUsers, FaUserPlus, FaPhone } from "react-icons/fa";
 import { MdOutlineDriveFileRenameOutline, MdEmail } from "react-icons/md";
 import { RiLockPasswordFill } from "react-icons/ri";
 import logo from "../../Img/Logo.png";
+import axios from "axios";
 
 const NavbarHome = () => {
   const [showModal, setShowModal] = useState(false);
@@ -26,7 +27,26 @@ const NavbarHome = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     handleClose();
-    // Aquí iría la lógica para enviar los datos al servidor
+    try {
+      const response = await axios.post("http://3.226.18.117/user", {
+        id: "",
+        nombre: formData.name,
+        apellidos: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        telefono: formData.phone,
+        fechaPlan: null,
+      });
+      if (response.status === 200) {
+        console.log("Usuario registrado exitosamente");
+        console.log(response.data);
+        localStorage.setItem('token', response.data.token);
+      } else {
+        console.error("Error al registrar usuario");
+      }
+    } catch (error) {
+      console.error("Error de red:", error);
+    }
   };
 
   const styles = {

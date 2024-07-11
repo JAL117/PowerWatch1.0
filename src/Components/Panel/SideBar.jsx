@@ -241,7 +241,7 @@ const SideBar = () => {
                 </NotificationButton>
               </Nav.Link>
               <Nav.Link><Button variant='outline-warning' onClick={handleOffcanvasShow}><FaUser size={30} /></Button></Nav.Link>
-              <Nav.Link><Button variant='outline-warning' as={Link} to="/"><FaSignOutAlt size={30} /></Button></Nav.Link>
+              <Nav.Link><Button variant='outline-warning' onClick={() => localStorage.clear()} as={Link} to="/"><FaSignOutAlt size={30} /></Button></Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>

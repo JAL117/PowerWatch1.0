@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Card, Button, Form, Modal, Container, Row, Col } from 'react-bootstrap';
 import styled from 'styled-components';
 import { FaCreditCard, FaRegClock, FaChartLine, FaFileAlt, FaCalendarAlt, FaMoneyBillWave } from 'react-icons/fa';
@@ -86,6 +86,7 @@ const StyledButton = styled(Button)`
 const Planes = () => {
     const [showPaymentForm, setShowPaymentForm] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState(null);
+    const [planDate, setPlanDate] = useState('');
 
     const handleCompra = (plan) => {
         setSelectedPlan(plan);
@@ -102,7 +103,12 @@ const Planes = () => {
         alert('Pago procesado con éxito');
         setShowPaymentForm(false);
     };
-
+    useEffect(() => {
+        const savedValue = JSON.parse(localStorage.getItem('user'));
+        if (savedValue.plan != null ) {
+            setPlanDate(savedValue.plan.split("T")[0]);
+        }
+    }, []);
     return (
         <PlanesContainer fluid>
             <h1 className="text-center mb-5">Planes de Suscripción</h1>
@@ -114,7 +120,7 @@ const Planes = () => {
                         <p>Plan Mensual</p>
                     </Col>
                     <Col md={6} className="text-md-end">
-                        <p><FaCalendarAlt /> Vence: 31 de Agosto, 2024</p>
+                        <p><FaCalendarAlt />{ " "+planDate}</p>
                     </Col>
                 </Row>
             </PlanActual>
