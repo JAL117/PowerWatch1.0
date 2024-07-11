@@ -7,46 +7,37 @@ import Animaciones from '../Components/common/animaciones';
 
 const Login = () => {
     return (
-
         <Animaciones>
-            <div style={{
-            position: 'relative',
-            minHeight: '100vh', // Usamos minHeight para asegurar altura mínima
-            overflow: 'hidden',
-        }}>
-            <img src={BackgroundImage} alt="Imagen de fondo" style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                zIndex: '-1',
-                filter: 'blur(7px)'
-            }} />
+            <div className="min-vh-100 position-relative overflow-hidden">
+                <img 
+                    src={BackgroundImage} 
+                    alt="Imagen de fondo" 
+                    className="position-absolute w-100 h-100 object-fit-cover"
+                    style={{
+                        zIndex: '-1',
+                        filter: 'blur(7px)'
+                    }} 
+                />
 
-            <div className="overlay" style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: 'linear-gradient(to right, rgba(0,19,111,0.95), rgba(0,68,255,0.5))',
-                display: 'flex',
-                flexDirection: 'row',
-            }}>
-                <Container fluid style={{ padding: 0 }}>
-                    <Row className="h-100">
-                        <Col md={6} className="d-flex align-items-center justify-content-center">
-                            <Logos />
-                        </Col>
-                        <Col md={6} className="d-flex align-items-center justify-content-center">
-                            <FormularioLogin />
-                        </Col>
-                    </Row>
-                </Container>
+                <div 
+                    className="position-absolute top-0 start-0 w-100 h-100 d-flex"
+                    style={{
+                        background: 'linear-gradient(to right, rgba(0,19,111,0.95), rgba(0,68,255,0.5))'
+                    }}
+                >
+                    <Container fluid className="p-0">
+                        <Row className="h-100 g-0">
+                            <Col md={6} className="d-flex align-items-center justify-content-center">
+                                <Logos />
+                            </Col>
+                            <Col md={6} className="d-flex align-items-center justify-content-center">
+                                <FormularioLogin />
+                            </Col>
+                        </Row>
+                    </Container>
+                </div>
             </div>
-        </div>
         </Animaciones>
-        
     );
 }
 

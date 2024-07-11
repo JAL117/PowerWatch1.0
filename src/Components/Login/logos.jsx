@@ -1,32 +1,20 @@
 import React from "react";
 import { Button } from "react-bootstrap";
 import logo from "../../Img/Logo.png";
-import { Link } from "react-router-dom";
-import { IoMdArrowRoundBack } from "react-icons/io";
+
 
 const Logos = () => {
   return (
-    <div>
-      <Button
-        variant="outline-light"
-        as={Link}
-        to="/"
-        style={{ alignSelf: "flex-start", border: "none" }}
-      >
-        <IoMdArrowRoundBack size={40} />
-      </Button>
-      <div
-        className="d-flex justify-content-between align-items-center"
-        style={{ padding: "10px" }}
-      >
-        <div
-          className="d-flex flex-column align-items-center"
-          style={{ color: "#ffff" }}
-        >
-          <img src={logo} alt="Logo" style={{ maxWidth: "70%" }} />
-          <h1 style={{ fontSize: "clamp(3rem , 5vw , 7rem)" }}>PowerWatch</h1>
-          <h2>by Piweb</h2>
-        </div>
+    <div className="d-flex flex-column h-100">
+      <div className="flex-grow-1 d-flex flex-column justify-content-center align-items-center text-white">
+        <img 
+          src={logo} 
+          alt="Logo" 
+          className="img-fluid mb-4" 
+          style={{ maxWidth: "300px" }}
+        />
+        <h1 className="display-4 fw-bold mb-2">PowerWatch</h1>
+        <h2 className="h4 font-weight-light">by Piweb</h2>
       </div>
     </div>
   );

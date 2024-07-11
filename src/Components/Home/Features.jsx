@@ -7,31 +7,84 @@ import { BsGraphUp } from "react-icons/bs";
 import { IoNotificationsOutline } from "react-icons/io5";
 
 const Features = () => {
+  const features = [
+    {
+      icon: <AiOutlineAlert />,
+      title: "Aplicaciones Críticas",
+      description: "Ideal para monitorear áreas críticas dentro de una empresa, PowerWatch es especialmente útil en sectores de alta demanda energética, asegurando que todos los sistemas funcionen de manera óptima y segura."
+    },
+    {
+      icon: <RiMoneyDollarCircleLine />,
+      title: "Optimización de Costos",
+      description: "Nuestro sistema proporciona herramientas para analizar y optimizar el consumo energético, permitiendo a las empresas reducir costos significativamente."
+    },
+    {
+      icon: <BsGraphUp />,
+      title: "Visualización y Análisis",
+      description: "Gráficos interactivos muestran el comportamiento del consumo de energía a lo largo del tiempo, facilitando la comparación con facturas y la identificación de discrepancias."
+    },
+    {
+      icon: <IoNotificationsOutline />,
+      title: "Alarma y Prevención",
+      description: "Sistema de alertas en tiempo real para prevenir problemas y optimizar el uso de energía, permitiendo una respuesta rápida ante cualquier anomalía."
+    }
+  ];
+
+  const styles = {
+    featureSection: {
+      backgroundColor: "#f8f9fa",
+      padding: "3rem 0",
+      Width:"80%"
+    },
+    header: {
+      fontSize: "clamp(2rem, 5vw, 4rem)",
+      color: "#00126E",
+      marginBottom: "2rem",
+    },
+    subHeader: {
+      fontSize: "clamp(1.5rem, 5vw, 3rem)",
+      color: "#ffc107",
+      marginBottom: "2rem",
+    },
+    paragraph: {
+      fontSize: "clamp(1rem, 5vw, 2rem)",
+      color: "#6c757d",
+      textAlign: "justify",
+    },
+    image: {
+      maxWidth: "100%",
+      height: "auto",
+      borderRadius: "50%",
+      boxShadow: "0 0.5rem 1rem rgba(0, 0, 0, 0.15)",
+    },
+    card: {
+      height: "100%",
+      transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+      "&:hover": {
+        transform: "translateY(-5px)",
+        boxShadow: "0 0.5rem 1rem rgba(0, 0, 0, 0.15)",
+      },
+    },
+    featureIcon: {
+      backgroundColor: "#e9ecef",
+      width: "80px",
+      height: "80px",
+      borderRadius: "50%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      margin: "0 auto 1rem",
+    },
+  };
+
   return (
-    <Container className="my-5 mb-5">
-      <Row>
-        <Col xs={12} className="text-center mt-5">
-          <h2
-            className="responsive-h2"
-            style={{
-              fontSize: "clamp(2rem, 5vw, 3rem)",
-              color: "#00126E",
-              textAlign: "justify",
-              padding: "20px",
-            }}
-          >
-            ¿Qué es PowerWatch?
-          </h2>
-          <div className="row">
-            <div className="col-md-8">
-              <p
-                className="mb-5 responsive-p"
-                style={{
-                  fontSize: "clamp(1rem, 1.5vw, 2.5rem)",
-                  textAlign: "justify",
-                  padding: "20px",
-                }}
-              >
+    <Container fluid style={styles.featureSection} className="p-5 mt-5">
+      <Row className="justify-content-center">
+        <Col xs={12} lg={10} className="text-center mb-5">
+          <h2 style={styles.header}>¿Qué es PowerWatch?</h2>
+          <Row className="align-items-center">
+            <Col md={8}>
+              <p style={styles.paragraph}>
                 PowerWatch es un servicio integral de monitoreo de energía
                 diseñado para empresas y sus sectores de producción. Este
                 sistema está preparado para medir y analizar el consumo de
@@ -39,96 +92,38 @@ const Features = () => {
                 esenciales para la gestión eficiente de los recursos
                 energéticos.
               </p>
-            </div>
-            <div className="col-md-4 d-flex justify-content-center align-items-center">
+            </Col>
+            <Col md={4}>
               <img
                 src={empresario}
                 alt="Detective de energía"
-                className="img-fluid"
-                style={{
-                  maxWidth: "100%",
-                  height: "auto",
-                  maxHeight: "40vh",
-                }}
+                style={styles.image}
               />
-            </div>
-          </div>
+            </Col>
+          </Row>
         </Col>
       </Row>
-      <Row className="mt-5 mb-5">
-        <p style={{ fontSize: "35pt", color: "orange", fontWeight: "550" }}>
-          Funciones
-        </p>
-        <Col md={3}>
-          <Card
-            className="text-center mt-2"
-            style={{ backgroundColor: "rgb(169 ,169, 169, 0.2)" }}
-          >
-            <Card.Body>
-              <AiOutlineAlert size={50} className="mb-3"/>
-              <Card.Title style={{ fontSize: "20pt" }}>
-                Aplicaciones Críticas
-              </Card.Title>
-              <Card.Text style={{ textAlign: "justify", fontSize: "15pt" }}>
-                Ideal para monitorear áreas críticas dentro de una empresa,
-                EnergyTrack es especialmente útil en sectores de alta demanda
-                energética, asegurando que todos los sistemas funcionen de
-                manera óptima y segura.
-              </Card.Text>
-            </Card.Body>
-          </Card>
+      
+      <Row className="justify-content-center">
+        <Col xs={12} className="text-center mb-5">
+          <h3 style={styles.subHeader}>Funciones</h3>
         </Col>
-        <Col md={3}>
-          <Card
-            className="text-center mt-2"
-            style={{ backgroundColor: "rgb(169 ,169, 169, 0.2)" }}
-          >
-            <Card.Body>
-              <RiMoneyDollarCircleLine size={50} className="mb-3" />
-              <Card.Title style={{ fontSize: "20pt" }}>Optimización de Costos</Card.Title>
-              <Card.Text style={{ textAlign: "justify", fontSize: "15pt" }}>
-                El sistema proporciona gráficos interactivos que muestran el
-                comportamiento del consumo de energía a lo largo del tiempo.
-                Esto facilita la comparación con las facturas del proveedor y
-                ayuda a identificar discrepancias.
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card
-            className="text-center mt-2"
-            style={{ backgroundColor: "rgb(169 ,169, 169, 0.2)" }}
-          >
-            <Card.Body>
-            <BsGraphUp size={50} className="mb-3" />
-              <Card.Title style={{ fontSize: "20pt" }}>Visualización y Análisis</Card.Title>
-              <Card.Text style={{ textAlign: "justify", fontSize: "15pt" }}>
-                El sistema proporciona gráficos interactivos que muestran el
-                comportamiento del consumo de energía a lo largo del tiempo.
-                Esto facilita la comparación con las facturas del proveedor y
-                ayuda a identificar discrepancias.
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={3}>
-          <Card
-            className="text-center mt-2"
-            style={{ backgroundColor: "rgb(169 ,169, 169, 0.2)" }}
-          >
-            <Card.Body>
-            <IoNotificationsOutline size={50} className="mb-3" />
-              <Card.Title style={{ fontSize: "20pt" }}>Alarma y Prevención</Card.Title>
-              <Card.Text style={{ textAlign: "justify", fontSize: "15pt" }}>
-                El sistema proporciona gráficos interactivos que muestran el
-                comportamiento del consumo de energía a lo largo del tiempo.
-                Esto facilita la comparación con las facturas del proveedor y
-                ayuda a identificar discrepancias.
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </Col>
+      </Row>
+      
+      <Row className="justify-content-center">
+        {features.map((feature, index) => (
+          <Col key={index} xs={12} md={6} lg={3} className="mb-4">
+            <Card style={styles.card}>
+              <Card.Body className="d-flex flex-column">
+                <div style={styles.featureIcon}>
+                  {React.cloneElement(feature.icon, { size: 40 })}
+                </div>
+                <Card.Title className="h4 mb-3">{feature.title}</Card.Title>
+                <Card.Text className="text-muted flex-grow-1">{feature.description}</Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
       </Row>
     </Container>
   );
