@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar, Nav, Container, Button, Offcanvas, Form } from "react-bootstrap";
-import { FaChartBar, FaBalanceScale, FaBars, FaUser, FaSignOutAlt } from "react-icons/fa";
+import { Navbar, Nav, Container, Button, Offcanvas, Form, Badge } from "react-bootstrap";
+import { FaChartBar, FaBalanceScale, FaBars, FaUser, FaSignOutAlt, FaBell } from "react-icons/fa";
 import { HiDocumentDownload } from "react-icons/hi";
+import { IoInformationCircle, IoWarning } from "react-icons/io5";
 import styled from 'styled-components';
 import img from "../../Img/Logo.png"
 import { Link } from 'react-router-dom';
@@ -142,13 +143,45 @@ const StyledForm = styled(Form)`
   }
 `;
 
+const NotificationButton = styled(Button)`
+  position: relative;
+`;
+
+const NotificationBadge = styled(Badge)`
+  position: absolute;
+  top: -5px;
+  right: -5px;
+`;
+
+const NotificationItem = styled.div`
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  svg {
+    margin-right: 10px;
+    font-size: 1.2rem;
+  }
+`;
+
 const SideBar = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, type: 'info', message: 'Su plan esta por expirar' },
+    { id: 2, type: 'alert', message: 'Consumo excesivo detectado' },
+    { id: 3, type: 'info', message: 'Su plan esta por expirar' },
+  ]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -170,6 +203,9 @@ const SideBar = () => {
 
   const handleOffcanvasClose = () => setShowOffcanvas(false);
   const handleOffcanvasShow = () => setShowOffcanvas(true);
+
+  const handleNotificationsClose = () => setShowNotifications(false);
+  const handleNotificationsShow = () => setShowNotifications(true);
 
   const handlePasswordChange = (e) => {
     e.preventDefault();
@@ -196,6 +232,14 @@ const SideBar = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
+              <Nav.Link>
+                <NotificationButton variant='outline-warning' onClick={handleNotificationsShow}>
+                  <FaBell size={30} />
+                  {notifications.length > 0 && (
+                    <NotificationBadge bg="danger">{notifications.length}</NotificationBadge>
+                  )}
+                </NotificationButton>
+              </Nav.Link>
               <Nav.Link><Button variant='outline-warning' onClick={handleOffcanvasShow}><FaUser size={30} /></Button></Nav.Link>
               <Nav.Link><Button variant='outline-warning' as={Link} to="/"><FaSignOutAlt size={30} /></Button></Nav.Link>
             </Nav>
@@ -285,6 +329,24 @@ const SideBar = () => {
               Cambiar Contraseña
             </Button>
           </StyledForm>
+        </Offcanvas.Body>
+      </StyledOffcanvas>
+
+      <StyledOffcanvas show={showNotifications} onHide={handleNotificationsClose} placement="end">
+        <Offcanvas.Header closeButton>
+          <StyledOffcanvasTitle>Notificaciones</StyledOffcanvasTitle>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          {notifications.map((notification) => (
+            <NotificationItem key={notification.id}>
+              {notification.type === 'info' ? (
+                <IoInformationCircle color="#3498db" />
+              ) : (
+                <IoWarning color="#e74c3c" />
+              )}
+              <span>{notification.message}</span>
+            </NotificationItem>
+          ))}
         </Offcanvas.Body>
       </StyledOffcanvas>
     </>

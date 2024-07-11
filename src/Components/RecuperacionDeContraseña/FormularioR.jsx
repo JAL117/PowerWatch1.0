@@ -1,24 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-/*import { useLocation, useHistory } from "react-router-dom";*/
+import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const FormularioR = () => {
  
- /* const query = new URLSearchParams(useLocation().search);
+  const query = new URLSearchParams(useLocation().search);
   const token = query.get("token");
   const email = query.get("email");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showForm, setShowForm] = useState(true); 
-  const history = useHistory();
+ 
 
-  useEffect(() => {
-    if (!token || !email) {
-      showErrorAlert("Enlace inválido");
-      history.push("/");
-    }
-  }, [token, email, history]);*/
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
