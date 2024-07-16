@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Form, Modal, Container, Row, Col } from 'react-bootstrap';
 import styled from 'styled-components';
-import { FaCreditCard, FaRegClock, FaChartLine, FaFileAlt, FaCalendarAlt, FaMoneyBillWave, FaMobile, FaTools } from 'react-icons/fa';
+import { FaCreditCard, FaRegClock, FaChartLine, FaFileAlt, FaCalendarAlt, FaMoneyBillWave, FaMobile, FaTools, FaMapMarkerAlt } from 'react-icons/fa';
 
 const PlanesContainer = styled(Container)`
   min-height: 90vh;
@@ -10,7 +10,6 @@ const PlanesContainer = styled(Container)`
   justify-content: center;
   padding: 0px 50px;
   background-color: #f8f9fa;
- 
 `;
 
 const PlanActual = styled(Card)`
@@ -87,35 +86,55 @@ const StyledButton = styled(Button)`
 
 const Planes = () => {
     const [showPaymentForm, setShowPaymentForm] = useState(false);
+    const [showAddressForm, setShowAddressForm] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [planDate, setPlanDate] = useState('');
+    const [address, setAddress] = useState({
+        street: '',
+        number: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        references: '',
+    });
 
     const handleCompra = (plan) => {
         setSelectedPlan(plan);
-        setShowPaymentForm(true);
+        if (plan === 'dispositivo' || plan === 'dispositivo-instalacion') {
+            setShowAddressForm(true);
+        } else {
+            setShowPaymentForm(true);
+        }
     };
 
-    const handleClosePaymentForm = () => {
+    const handleCloseForm = () => {
+        setShowAddressForm(false);
         setShowPaymentForm(false);
+    };
+
+    const handleAddressSubmit = (e) => {
+        e.preventDefault();
+        setShowAddressForm(false);
+        setShowPaymentForm(true);
     };
 
     const handleSubmitPayment = (e) => {
         e.preventDefault();
         // Aquí iría la lógica para procesar el pago
         alert('Pago procesado con éxito');
-        setShowPaymentForm(false);
+        handleCloseForm();
     };
 
     useEffect(() => {
         const savedValue = JSON.parse(localStorage.getItem('user'));
-        if (savedValue.plan != null) {
+        if (savedValue && savedValue.plan != null) {
             setPlanDate(savedValue.plan.split("T")[0]);
         }
     }, []);
 
     return (
         <PlanesContainer fluid>
-            <h1 className="text-center mb-5 mt-5">Planes de Suscripción</h1>
+            <h1 className="text-center mb-5">Planes de Suscripción</h1>
 
             <PlanActual>
                 <Row>
@@ -201,7 +220,80 @@ const Planes = () => {
                 </Col>
             </PlanesGrid>
 
-            <Modal show={showPaymentForm} onHide={handleClosePaymentForm} centered>
+            <Modal show={showAddressForm} onHide={handleCloseForm} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Dirección de Envío - {selectedPlan === 'dispositivo' ? 'Dispositivo Power Watch' : 'Dispositivo + Instalación'}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form onSubmit={handleAddressSubmit}>
+                        <Form.Group className="mb-3">
+                            <Form.Label><FaMapMarkerAlt /> Calle</Form.Label>
+                            <Form.Control 
+                                type="text" 
+                                placeholder="Calle" 
+                                required 
+                                value={address.street}
+                                onChange={(e) => setAddress({...address, street: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Número</Form.Label>
+                            <Form.Control 
+                                type="text" 
+                                placeholder="Número" 
+                                required 
+                                value={address.number}
+                                onChange={(e) => setAddress({...address, number: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Ciudad</Form.Label>
+                            <Form.Control 
+                                type="text" 
+                                placeholder="Ciudad" 
+                                required 
+                                value={address.city}
+                                onChange={(e) => setAddress({...address, city: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Estado</Form.Label>
+                            <Form.Control 
+                                type="text" 
+                                placeholder="Estado" 
+                                required 
+                                value={address.state}
+                                onChange={(e) => setAddress({...address, state: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Código Postal</Form.Label>
+                            <Form.Control 
+                                type="text" 
+                                placeholder="Código Postal" 
+                                required 
+                                value={address.zipCode}
+                                onChange={(e) => setAddress({...address, zipCode: e.target.value})}
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Referencias</Form.Label>
+                            <Form.Control 
+                                as="textarea" 
+                                rows={3}
+                                placeholder="Referencias para la entrega" 
+                                value={address.references}
+                                onChange={(e) => setAddress({...address, references: e.target.value})}
+                            />
+                        </Form.Group>
+                        <StyledButton type="submit" className="w-100">
+                            Continuar al Pago
+                        </StyledButton>
+                    </Form>
+                </Modal.Body>
+            </Modal>
+
+            <Modal show={showPaymentForm} onHide={handleCloseForm} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Formulario de Pago - {selectedPlan === 'mensual' ? 'Plan Mensual' : selectedPlan === 'anual' ? 'Plan Anual' : selectedPlan === 'dispositivo' ? 'Dispositivo Power Watch' : 'Dispositivo + Instalación'}</Modal.Title>
                 </Modal.Header>
