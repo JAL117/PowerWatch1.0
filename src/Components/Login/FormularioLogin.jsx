@@ -28,7 +28,6 @@ function FormularioLogin() {
     confirmPassword: "",
   });
   const navigate = useNavigate();
-  //const apiUrl = process.env.REACT_APP_API_URL
   const handleShowRegister = () => setShowModalRegister(true);
   const handleCloseRegister = () => {
     setShowModalRegister(false);
@@ -55,7 +54,7 @@ function FormularioLogin() {
     handleCloseRegister();
 
     try {
-      const response = await axios.post("http://3.226.18.117/user", {
+      const response = await axios.post("https://api-piweb.piweb.lat/user", {
         id: "",
         nombre: formData.name,
         apellidos: formData.lastName,
@@ -81,7 +80,7 @@ function FormularioLogin() {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post("http://3.226.18.117/user/login", {
+      const response = await axios.post("https://api-piweb.piweb.lat/user/login", {
         email,
         password,
       });
@@ -112,7 +111,7 @@ function FormularioLogin() {
 
   const handleSendEmail = () => {
     axios
-      .post("http://3.226.18.117/user/recoverpass", { email })
+      .post("https://api-piweb.piweb.lat/user/recoverpass", { email })
       .then((response) => {
         console.log(response.data);
         MySwal.fire(

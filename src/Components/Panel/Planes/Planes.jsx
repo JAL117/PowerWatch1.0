@@ -1,7 +1,7 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Button, Form, Modal, Container, Row, Col } from 'react-bootstrap';
 import styled from 'styled-components';
-import { FaCreditCard, FaRegClock, FaChartLine, FaFileAlt, FaCalendarAlt, FaMoneyBillWave } from 'react-icons/fa';
+import { FaCreditCard, FaRegClock, FaChartLine, FaFileAlt, FaCalendarAlt, FaMoneyBillWave, FaMobile, FaTools } from 'react-icons/fa';
 
 const PlanesContainer = styled(Container)`
   min-height: 90vh;
@@ -10,6 +10,7 @@ const PlanesContainer = styled(Container)`
   justify-content: center;
   padding: 0px 50px;
   background-color: #f8f9fa;
+ 
 `;
 
 const PlanActual = styled(Card)`
@@ -28,6 +29,7 @@ const PlanActual = styled(Card)`
     width: 95%;
   }
 `;
+
 const PlanesGrid = styled(Row)`
   justify-content: center;
 `;
@@ -103,15 +105,17 @@ const Planes = () => {
         alert('Pago procesado con éxito');
         setShowPaymentForm(false);
     };
+
     useEffect(() => {
         const savedValue = JSON.parse(localStorage.getItem('user'));
-        if (savedValue.plan != null ) {
+        if (savedValue.plan != null) {
             setPlanDate(savedValue.plan.split("T")[0]);
         }
     }, []);
+
     return (
         <PlanesContainer fluid>
-            <h1 className="text-center mb-5">Planes de Suscripción</h1>
+            <h1 className="text-center mb-5 mt-5">Planes de Suscripción</h1>
 
             <PlanActual>
                 <Row>
@@ -120,11 +124,12 @@ const Planes = () => {
                         <p>Plan Mensual</p>
                     </Col>
                     <Col md={6} className="text-md-end">
-                        <p><FaCalendarAlt />{ " "+planDate}</p>
+                        <p><FaCalendarAlt />{" " + planDate}</p>
                     </Col>
                 </Row>
             </PlanActual>
 
+            <h2 className="text-center mb-4">Planes de Servicio</h2>
             <PlanesGrid>
                 <Col md={6} lg={5} xl={4} className="mb-4">
                     <PlanCard>
@@ -160,9 +165,45 @@ const Planes = () => {
                 </Col>
             </PlanesGrid>
 
+            <h2 className="text-center mb-4 mt-5">Dispositivos Power Watch</h2>
+            <PlanesGrid>
+                <Col md={6} lg={5} xl={4} className="mb-4">
+                    <PlanCard>
+                        <Card.Body className="d-flex flex-column">
+                            <PlanTitle>Dispositivo Power Watch</PlanTitle>
+                            <PlanPrice><FaMoneyBillWave /> $3,500 MXN</PlanPrice>
+                            <Card.Text>
+                                <ul className="list-unstyled">
+                                    <PlanFeature><FaMobile /> Dispositivo Power Watch</PlanFeature>
+                                    <PlanFeature><FaChartLine /> Monitoreo en tiempo real</PlanFeature>
+                                </ul>
+                            </Card.Text>
+                            <StyledButton className="mt-auto" onClick={() => handleCompra('dispositivo')}>Comprar Ahora</StyledButton>
+                        </Card.Body>
+                    </PlanCard>
+                </Col>
+
+                <Col md={6} lg={5} xl={4} className="mb-4">
+                    <PlanCard>
+                        <Card.Body className="d-flex flex-column">
+                            <PlanTitle>Dispositivo + Instalación</PlanTitle>
+                            <PlanPrice><FaMoneyBillWave /> $4,100 MXN</PlanPrice>
+                            <Card.Text>
+                                <ul className="list-unstyled">
+                                    <PlanFeature><FaMobile /> Dispositivo Power Watch</PlanFeature>
+                                    <PlanFeature><FaTools /> Instalación profesional</PlanFeature>
+                                    <PlanFeature><FaChartLine /> Monitoreo en tiempo real</PlanFeature>
+                                </ul>
+                            </Card.Text>
+                            <StyledButton className="mt-auto" onClick={() => handleCompra('dispositivo-instalacion')}>Comprar Ahora</StyledButton>
+                        </Card.Body>
+                    </PlanCard>
+                </Col>
+            </PlanesGrid>
+
             <Modal show={showPaymentForm} onHide={handleClosePaymentForm} centered>
                 <Modal.Header closeButton>
-                    <Modal.Title>Formulario de Pago - {selectedPlan === 'mensual' ? 'Plan Mensual' : 'Plan Anual'}</Modal.Title>
+                    <Modal.Title>Formulario de Pago - {selectedPlan === 'mensual' ? 'Plan Mensual' : selectedPlan === 'anual' ? 'Plan Anual' : selectedPlan === 'dispositivo' ? 'Dispositivo Power Watch' : 'Dispositivo + Instalación'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleSubmitPayment}>
