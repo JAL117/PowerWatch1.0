@@ -21,7 +21,7 @@ console.log(token,email);
       showErrorAlert("Las contraseñas no coinciden");
       return;
     }
-    const response = await fetch("http://3.226.18.117/user/passrecover", {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/passrecover`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
