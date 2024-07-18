@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Form, Modal, Container, Row, Col } from 'react-bootstrap';
 import styled from 'styled-components';
 import { FaCreditCard, FaRegClock, FaChartLine, FaFileAlt, FaCalendarAlt, FaMoneyBillWave, FaMobile, FaTools, FaMapMarkerAlt } from 'react-icons/fa';
+import axios from 'axios';
 
 const PlanesContainer = styled(Container)`
   min-height: 90vh;
@@ -97,13 +98,46 @@ const Planes = () => {
         zipCode: '',
         references: '',
     });
+    const [formData, setFormData] = useState({
+        tarjeta: '',
+        cvv: '',
+        fecha: '',
+        metodoPago: 'tarjeta',
+        monto: 0,
+        paquete: 1,
+        direccion: ''
+    });
 
-    const handleCompra = (plan) => {
+    useEffect(() => {
+        const savedValue = JSON.parse(localStorage.getItem('user'));
+        if (savedValue && savedValue.plan != null) {
+            setPlanDate(savedValue.plan.split("T")[0]);
+        }
+    }, []);
+
+    const handleCompra = async (plan) => {
         setSelectedPlan(plan);
-        if (plan === 'dispositivo' || plan === 'dispositivo-instalacion') {
-            setShowAddressForm(true);
-        } else {
-            setShowPaymentForm(true);
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('token');
+        const planId = plan === 'mensual' ? 1 : plan === 'anual' ? 2 : 1;
+
+        try {
+            await axios.put('https://api-piweb.piweb.lat/plan/assignPlan', {
+                email: user.email,
+                plan: planId
+            }, {
+                headers: {
+                    'x-token-access': token
+                }
+            });
+
+            if (plan === 'dispositivo' || plan === 'dispositivo-instalacion') {
+                setShowAddressForm(true);
+            } else {
+                setShowPaymentForm(true);
+            }
+        } catch (error) {
+            console.error('Error al asignar el plan:', error);
         }
     };
 
@@ -118,19 +152,33 @@ const Planes = () => {
         setShowPaymentForm(true);
     };
 
-    const handleSubmitPayment = (e) => {
+    const handleSubmitPayment = async (e) => {
         e.preventDefault();
-        // Aquí iría la lógica para procesar el pago
-        alert('Pago procesado con éxito');
-        handleCloseForm();
-    };
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('token');
+        const monto = selectedPlan === 'mensual' ? 221.33 : selectedPlan === 'anual' ? 2400 : 3500;
+        const fecha = new Date().toISOString().split('T')[0];
 
-    useEffect(() => {
-        const savedValue = JSON.parse(localStorage.getItem('user'));
-        if (savedValue && savedValue.plan != null) {
-            setPlanDate(savedValue.plan.split("T")[0]);
+        try {
+            await axios.post('https://api-piweb.piweb.lat/payments/generate', {
+                ...formData,
+                fecha: fecha,
+                email: user.email,
+                monto: monto,
+                paquete: selectedPlan === 'mensual' ? 1 : selectedPlan === 'anual' ? 2 : 1,
+                direccion: ''
+            }, {
+                headers: {
+                    'x-token-access': token
+                }
+            });
+
+            alert('Pago procesado con éxito');
+            handleCloseForm();
+        } catch (error) {
+            console.error('Error al procesar el pago:', error);
         }
-    }, []);
+    };
 
     return (
         <PlanesContainer fluid>
@@ -301,7 +349,13 @@ const Planes = () => {
                     <Form onSubmit={handleSubmitPayment}>
                         <Form.Group className="mb-3">
                             <Form.Label><FaCreditCard /> Número de Tarjeta</Form.Label>
-                            <Form.Control type="text" placeholder="1234 5678 9012 3456" required />
+                            <Form.Control 
+                                type="text" 
+                                placeholder="1234 5678 9012 3456" 
+                                required 
+                                value={formData.tarjeta}
+                                onChange={(e) => setFormData({...formData, tarjeta: e.target.value})}
+                            />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Nombre en la Tarjeta</Form.Label>
@@ -311,13 +365,25 @@ const Planes = () => {
                             <Col md={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>Fecha de Expiración</Form.Label>
-                                    <Form.Control type="text" placeholder="MM/AA" required />
+                                    <Form.Control 
+                                        type="text" 
+                                        placeholder="MM/AA" 
+                                        required 
+                                        value={formData.fecha}
+                                        onChange={(e) => setFormData({...formData, fecha: e.target.value})}
+                                    />
                                 </Form.Group>
                             </Col>
                             <Col md={6}>
                                 <Form.Group className="mb-3">
                                     <Form.Label>CVV</Form.Label>
-                                    <Form.Control type="text" placeholder="123" required />
+                                    <Form.Control 
+                                        type="text" 
+                                        placeholder="123" 
+                                        required 
+                                        value={formData.cvv}
+                                        onChange={(e) => setFormData({...formData, cvv: e.target.value})}
+                                    />
                                 </Form.Group>
                             </Col>
                         </Row>
