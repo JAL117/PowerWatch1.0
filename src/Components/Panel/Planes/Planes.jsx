@@ -134,7 +134,7 @@ const Planes = () => {
 
     return (
         <PlanesContainer fluid>
-            <h1 className="text-center mb-5">Planes de Suscripción</h1>
+            <h1 className="text-center mb-5 mt-5">Planes de Suscripción</h1>
 
             <PlanActual>
                 <Row>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { PDFDownloadLink, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import React, { useState, useEffect, useRef } from 'react';
+import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import styled, { createGlobalStyle } from 'styled-components';
 import { Line, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
@@ -35,6 +35,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 10,
   },
+  image: {
+    marginVertical: 15,
+    marginHorizontal: 100,
+  },
 });
 
 const ReportContainer = styled.div`
@@ -43,8 +47,8 @@ const ReportContainer = styled.div`
   height: 100%;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #f0f4f8;
+  padding: 50px;
+  background-color: #00126E;
   box-sizing: border-box;
 `;
 
@@ -116,6 +120,10 @@ const Td = styled.td`
 const Report = () => {
   const [reportData, setReportData] = useState(null);
   const [damageProbs, setDamageProbs] = useState(null);
+  const lineChartRef = useRef(null);
+  const pieChartRef = useRef(null);
+  const [lineChartImage, setLineChartImage] = useState(null);
+  const [pieChartImage, setPieChartImage] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -150,6 +158,13 @@ const Report = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (lineChartRef.current && pieChartRef.current) {
+      setLineChartImage(lineChartRef.current.toBase64Image());
+      setPieChartImage(pieChartRef.current.toBase64Image());
+    }
+  }, [reportData, damageProbs]);
+
   if (!reportData || !damageProbs) {
     return <div>Cargando...</div>;
   }
@@ -181,10 +196,10 @@ const Report = () => {
   return (
     <div style={{marginLeft:"5%"}}>
       <GlobalStyle />
-      <ReportContainer>
+      <ReportContainer style={{borderRadius:"25px"}}>
         <ReportHeader>
-          <ReportTitle>Reporte de Equipo: {reportData.equipmentName}</ReportTitle>
-          <PDFDownloadLink document={<ReportPDF data={reportData} damageProbs={damageProbs} />} fileName="reporte_equipo.pdf">
+          <ReportTitle style={{color:"#ffff"}}>Reporte de Equipo: {reportData.equipmentName}</ReportTitle>
+          <PDFDownloadLink document={<ReportPDF data={reportData} damageProbs={damageProbs} lineChartImage={lineChartImage} pieChartImage={pieChartImage} />} fileName="reporte_equipo.pdf">
             {({ blob, url, loading, error }) =>
               loading ? 'Generando PDF...' : <DownloadButton>Descargar PDF</DownloadButton>
             }
@@ -199,7 +214,7 @@ const Report = () => {
           <ReportSection>
             <SectionTitle>Consumo Mensual</SectionTitle>
             <div style={{ height: '200px' }}>
-              <Line data={consumptionChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+              <Line ref={lineChartRef} data={consumptionChartData} options={{ responsive: true, maintainAspectRatio: false }} />
             </div>
           </ReportSection>
           <ReportSection>
@@ -230,7 +245,7 @@ const Report = () => {
           <ReportSection>
             <SectionTitle>Gráfico de Probabilidades</SectionTitle>
             <div style={{ height: '200px' }}>
-              <Pie data={probChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+              <Pie ref={pieChartRef} data={probChartData} options={{ responsive: true, maintainAspectRatio: false }} />
             </div>
           </ReportSection>
         </ReportContent>
@@ -239,7 +254,7 @@ const Report = () => {
   );
 };
 
-const ReportPDF = ({ data, damageProbs }) => (
+const ReportPDF = ({ data, damageProbs, lineChartImage, pieChartImage }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
@@ -250,6 +265,8 @@ const ReportPDF = ({ data, damageProbs }) => (
         <Text style={styles.text}>Bajo Consumo: {(damageProbs.low * 100).toFixed(2)}%</Text>
         <Text style={styles.text}>Consumo Medio: {(damageProbs.medium * 100).toFixed(2)}%</Text>
         <Text style={styles.text}>Alto Consumo: {(damageProbs.high * 100).toFixed(2)}%</Text>
+        {lineChartImage && <Image style={styles.image} src={lineChartImage} />}
+        {pieChartImage && <Image style={styles.image} src={pieChartImage} />}
       </View>
     </Page>
   </Document>

@@ -44,13 +44,14 @@ const GraficaTitle = styled.h1`
 const GraficaWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
+  justify-content: space-between;
+  gap: 2rem;
   width: 100%;
+  margin-top: 2rem;
 `;
 
 const GraficaItem = styled.div`
-  flex: 1 1 calc(33% - 2rem);
+  flex: 1 1 calc(33% - 1rem);
   min-width: 300px;
   background-color: #ffffff;
   padding: 1.5rem;
@@ -62,6 +63,10 @@ const GraficaItem = styled.div`
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  @media (max-width: 1200px) {
+    flex: 1 1 calc(50% - 1rem);
   }
 
   @media (max-width: 768px) {
@@ -78,15 +83,6 @@ const LiveIndicator = styled.div`
   background-color: #FFB800;
   border-radius: 50%;
   animation: ${pulse} 2s infinite;
-`;
-
-const HistogramContainer = styled.div`
-  width: 100%;
-  background-color: #ffffff;
-  padding: 1.5rem;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-top: 2rem;
 `;
 
 const options = {
@@ -195,6 +191,17 @@ const Grafica = () => {
     }],
   });
 
+  const [kwhSemanalData, setKwhSemanalData] = useState({
+    labels: [],
+    datasets: [{
+      label: 'kWh Consumidos por Día',
+      data: [],
+      backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1
+    }],
+  });
+
   useEffect(() => {
     const interval = setInterval(() => {
       // Simulación de datos en tiempo real
@@ -243,6 +250,21 @@ const Grafica = () => {
       }],
     });
 
+    // Simulación de datos semanales de kWh
+    const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const semanasKwh = Array.from({length: 7}, () => Math.floor(Math.random() * 100) + 50);
+    
+    setKwhSemanalData({
+      labels: diasSemana,
+      datasets: [{
+        label: 'kWh Consumidos por Día',
+        data: semanasKwh,
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1
+      }],
+    });
+
     return () => clearInterval(interval);
   }, []);
 
@@ -263,9 +285,32 @@ const Grafica = () => {
           <Line options={options} data={amperajeData} height={300} />
         </GraficaItem>
       </GraficaWrapper>
-      <HistogramContainer>
-        <Bar options={histogramOptions} data={kwhHistorialData} height={300} />
-      </HistogramContainer>
+      <GraficaWrapper>
+        <GraficaItem>
+          <Bar options={{
+            ...histogramOptions,
+            plugins: {
+              ...histogramOptions.plugins,
+              title: {
+                ...histogramOptions.plugins.title,
+                text: 'kWh Consumidos por Mes'
+              }
+            }
+          }} data={kwhHistorialData} height={300} />
+        </GraficaItem>
+        <GraficaItem>
+          <Bar options={{
+            ...histogramOptions,
+            plugins: {
+              ...histogramOptions.plugins,
+              title: {
+                ...histogramOptions.plugins.title,
+                text: 'kWh Consumidos por Día de la Semana'
+              }
+            }
+          }} data={kwhSemanalData} height={300} />
+        </GraficaItem>
+      </GraficaWrapper>
     </GraficaContainer>
   );
 }
