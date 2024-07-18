@@ -19,9 +19,9 @@ function FormularioLogin() {
   const [showModalRegister, setShowModalRegister] = useState(false);
   const [showModalForgotPassword, setShowModalForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
-    nombre: "",
-    apellidos: "",
-    telefono: "",
+    name: "",
+    lastName: "",
+    phone: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -31,9 +31,9 @@ function FormularioLogin() {
   const handleCloseRegister = () => {
     setShowModalRegister(false);
     setFormData({
-      nombre: "",
-      apellidos: "",
-      telefono: "",
+      name: "",
+      lastName: "",
+      phone: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -53,7 +53,7 @@ function FormularioLogin() {
     handleCloseRegister();
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/user`, formData);
+      const response = await axios.post("URL_DE_TU_API/registro", formData);
       if (response.status === 200) {
         console.log("Usuario registrado exitosamente");
       } else {
@@ -70,26 +70,28 @@ function FormularioLogin() {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, {
+      const response = await axios.post("URL_DE_TU_API/login", {
         email,
         password,
       });
       console.log(response.data);
+      // Maneja la respuesta de la API (ej. guardar token, redirigir usuario, etc.)
     } catch (error) {
       console.error("Error en la autenticación", error);
+      // Maneja el error (ej. mostrar mensaje de error al usuario)
     }
   };
 
   const handleSendEmail = () => {
     axios
-      .post(`${import.meta.env.VITE_API_URL}/user/recoverpass`, { email })
+      .post("URL_DE_TU_API/forgot-password", { email })
       .then((response) => {
         MySwal.fire(
           "Correo enviado",
           "Revisa tu bandeja de entrada para más instrucciones",
           "success"
         );
-        setShowModalForgotPassword(false);
+        setShowModalForgotPassword(false); // Cierra el modal después de enviar el correo
       })
       .catch((error) => {
         MySwal.fire("Error", "No se pudo enviar el correo", "error");
@@ -205,6 +207,8 @@ function FormularioLogin() {
           <Button
             type="submit"
             variant="dark"
+            as={Link}
+            to="/AreaCliente"
             style={{
               backgroundColor: "#00126E",
               width: "70%",
@@ -253,9 +257,9 @@ function FormularioLogin() {
         <Modal.Body style={styles.modal.body}>
           <Form onSubmit={handleRegisterSubmit}>
             {[
-              { id: "nombre", label: "Nombres", icon: <MdOutlineDriveFileRenameOutline /> },
-              { id: "apellidos", label: "Apellidos", icon: <MdOutlineDriveFileRenameOutline /> },
-              { id: "telefono", label: "Teléfono", icon: <FaPhone /> },
+              { id: "name", label: "Nombres", icon: <MdOutlineDriveFileRenameOutline /> },
+              { id: "lastName", label: "Apellidos", icon: <MdOutlineDriveFileRenameOutline /> },
+              { id: "phone", label: "Teléfono", icon: <FaPhone /> },
               { id: "email", label: "Email", icon: <MdEmail /> },
               { id: "password", label: "Contraseña", icon: <RiLockPasswordFill />, type: "password" },
               { id: "confirmPassword", label: "Confirmar Contraseña", icon: <RiLockPasswordFill />, type: "password" },

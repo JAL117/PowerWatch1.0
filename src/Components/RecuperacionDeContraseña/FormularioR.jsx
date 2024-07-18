@@ -11,6 +11,9 @@ const FormularioR = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showForm, setShowForm] = useState(true); 
+ 
+
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -22,7 +25,7 @@ const FormularioR = () => {
 
     showSuccessAlert("Token y email validados correctamente");
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/reset-password`, {
+    const response = await fetch("/api/reset-password", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
