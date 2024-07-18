@@ -160,7 +160,7 @@ const Planes = () => {
         const fecha = new Date().toISOString().split('T')[0];
 
         try {
-            await axios.post('https://api-piweb.piweb.lat/payments/generate', {
+            const response = await axios.post('https://api-piweb.piweb.lat/payments/generate', {
                 ...formData,
                 fecha: fecha,
                 email: user.email,
@@ -172,6 +172,11 @@ const Planes = () => {
                     'x-token-access': token
                 }
             });
+
+            const newPlanDate = response.data.data[1];
+            const updatedUser = { ...user, plan: newPlanDate };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            setPlanDate(newPlanDate.split("T")[0]);
 
             alert('Pago procesado con éxito');
             handleCloseForm();
