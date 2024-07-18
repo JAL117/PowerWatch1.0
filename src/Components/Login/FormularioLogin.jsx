@@ -28,6 +28,7 @@ function FormularioLogin() {
     confirmPassword: "",
   });
   const navigate = useNavigate();
+
   const handleShowRegister = () => setShowModalRegister(true);
   const handleCloseRegister = () => {
     setShowModalRegister(false);
@@ -67,10 +68,18 @@ function FormularioLogin() {
         console.log("Usuario registrado exitosamente");
         localStorage.setItem("token", response.data.token);
       } else {
-        console.error("Error al registrar usuario");
+        MySwal.fire(
+          "Error",
+          "Error al registrar usuario. Por favor, inténtalo de nuevo.",
+          "error"
+        );
       }
     } catch (error) {
-      console.error("Error de red:", error);
+      MySwal.fire(
+        "Error",
+        "Error de red al intentar registrar usuario. Por favor, inténtalo de nuevo más tarde.",
+        "error"
+      );
     }
   };
 
@@ -122,7 +131,11 @@ function FormularioLogin() {
         setShowModalForgotPassword(false);
       })
       .catch((error) => {
-        MySwal.fire("Error", error.response.data.messages);
+        MySwal.fire(
+          "Error",
+          error.response.data.messages,
+          "error"
+        );
       });
   };
 
