@@ -87,7 +87,7 @@ function FormularioLogin() {
       });
 
       if (response.status === 200) {
-        console.log(response.data);
+        console.log(response);
         const token = response.headers["x-token-access"];
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.data));
