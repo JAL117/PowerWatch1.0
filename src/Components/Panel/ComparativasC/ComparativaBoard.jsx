@@ -217,7 +217,7 @@ const ComparativaBoard = () => {
   };
 
   return (
-    <ComparativaContainer>
+    <ComparativaContainer style={{marginLeft:"14%"}}>
       <TitleMain style={{fontSize:"clamp(1rem , 5vw , 3rem)"}}>Total: kWh</TitleMain>
       <ContentContainer>
         <ChartContainer>

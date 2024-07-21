@@ -28,7 +28,7 @@ const NavbarHome = () => {
     e.preventDefault();
     handleClose();
     try {
-      const response = await axios.post("http://3.226.18.117/user", {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/user`, {
         id: "",
         nombre: formData.name,
         apellidos: formData.lastName,

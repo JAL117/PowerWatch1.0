@@ -7,6 +7,8 @@ import styled from 'styled-components';
 import img from "../../Img/Logo.png"
 import { Link } from 'react-router-dom';
 import { PiSubtitlesFill } from "react-icons/pi";
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const TopNavbar = styled(Navbar)`
   background-color: #00126E;
@@ -189,10 +191,12 @@ const SideBar = () => {
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); // Comprueba el tamaño inicial
+    handleResize();
 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const userData = JSON.parse(localStorage.getItem('user'));
 
   const toggleSidebar = () => {
     setSidebarExpanded(!sidebarExpanded);
@@ -207,18 +211,50 @@ const SideBar = () => {
   const handleNotificationsClose = () => setShowNotifications(false);
   const handleNotificationsShow = () => setShowNotifications(true);
 
-  const handlePasswordChange = (e) => {
+  const getToken = () => {
+    const token = localStorage.getItem('token');
+    return token;
+  };
+
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      alert('Las contraseñas nuevas no coinciden');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Las contraseñas nuevas no coinciden',
+      });
       return;
     }
-    // Aquí iría la lógica para cambiar la contraseña
-    console.log('Contraseña cambiada');
-    // Resetear los campos después de cambiar la contraseña
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+
+    try {
+      const token = getToken();
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/user/pass`, {
+        email: userData.email,
+        password: currentPassword,
+        password2: newPassword,
+      }, {
+        headers: {
+          'x-token-access':`${token}`,
+        },
+      });
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡Contraseña cambiada!',
+        text: 'Tu contraseña ha sido actualizada correctamente.',
+      });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      console.error('Error al cambiar la contraseña:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un error al cambiar la contraseña. Por favor, inténtalo de nuevo.',
+      });
+    }
   };
 
   return (
@@ -228,7 +264,7 @@ const SideBar = () => {
           <ToggleButton onClick={toggleSidebar}>
             <FaBars />
           </ToggleButton>
-          <Navbar.Brand href="/AreaCliente" style={{fontSize:"clamp(1.5rem , 5vw , 3rem)" , marginLeft:"20px"}}> PowerWatch </Navbar.Brand>
+          <Navbar.Brand href="/AreaCliente" style={{ fontSize: "clamp(1.5rem , 5vw , 3rem)", marginLeft: "20px" }}> PowerWatch </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
@@ -292,16 +328,20 @@ const SideBar = () => {
           <StyledOffcanvasTitle>Información del Usuario</StyledOffcanvasTitle>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <h4 style={{ color: '#FFB800' }}>Datos del Usuario</h4>
-          <p>Nombre: John Doe</p>
-          <p>Email: john@example.com</p>
-          
+          {userData && (
+            <>
+              <h4 style={{ color: '#FFB800' }}>Datos del Usuario</h4>
+              <p>Nombre: {userData.nombre + " " + userData.apellidos}</p>
+              <p>Email: {userData.email}</p>
+            </>
+          )}
+
           <h4 className="mt-4" style={{ color: '#FFB800' }}>Cambiar Contraseña</h4>
           <StyledForm onSubmit={handlePasswordChange}>
             <Form.Group className="mb-3">
               <Form.Label>Contraseña Actual</Form.Label>
-              <Form.Control 
-                type="password" 
+              <Form.Control
+                type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
@@ -309,8 +349,8 @@ const SideBar = () => {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Nueva Contraseña</Form.Label>
-              <Form.Control 
-                type="password" 
+              <Form.Control
+                type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
@@ -318,14 +358,14 @@ const SideBar = () => {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Confirmar Nueva Contraseña</Form.Label>
-              <Form.Control 
-                type="password" 
+              <Form.Control
+                type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
             </Form.Group>
-            <Button variant="primary" type="submit" >
+            <Button variant="primary" type="submit">
               Cambiar Contraseña
             </Button>
           </StyledForm>

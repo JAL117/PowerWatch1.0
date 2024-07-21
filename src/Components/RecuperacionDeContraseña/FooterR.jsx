@@ -12,7 +12,7 @@ import { FaGithub } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="text-white py-5" style={{ backgroundColor: "#00126E" }}>
+    <footer className="text-white py-5" style={{ backgroundColor: "#00126E" ,  }}>
       <Container>
         <Row className="align-items-center">
           <Col lg={4} className="mb-4 mb-lg-0">
