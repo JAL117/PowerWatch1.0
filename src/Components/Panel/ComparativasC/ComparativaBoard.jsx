@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { Bar } from 'react-chartjs-2';
+import axios from 'axios';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -181,22 +182,21 @@ const ComparativaBoard = () => {
   const [endDate, setEndDate] = useState('');
   const [costePorKw, setCostePorKw] = useState('');
   const [totalCobro, setTotalCobro] = useState('');
-
-  const chartData = {
+  const [chartData, setChartData] = useState({
     labels: ['Comparativa'],
     datasets: [
       {
-        label: 'Periodo Actual',
-        data: [65],
+        label: 'Costo Calculado',
+        data: [0],
         backgroundColor: '#FF6384',
       },
       {
-        label: 'Periodo Anterior',
-        data: [45],
+        label: 'Costo en Recibo',
+        data: [0],
         backgroundColor: '#36A2EB',
       },
     ],
-  };
+  });
 
   const options = {
     responsive: true,
@@ -235,9 +235,55 @@ const ComparativaBoard = () => {
     },
   };
 
-  const handleCalcular = () => {
-    console.log("Calculando...", { startDate, endDate, costePorKw, totalCobro });
-    // Aquí iría la lógica para calcular y actualizar el gráfico
+  const handleCalcular = async () => {
+   
+    const id_user = JSON.parse(localStorage.getItem("user")).id;
+    const token = localStorage.getItem("token");
+
+    if (!id_user || !startDate || !endDate || !costePorKw) {
+      alert('Por favor, completa todos los campos.');
+      return;
+    }
+
+    try {
+    
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/data/date/${id_user}/${startDate}/${endDate}`,{
+        headers: {
+          "x-token-access": token,
+        },
+      });
+
+
+
+      let consumo = 0; 
+      if (response.data) {
+        consumo = response.data; 
+      }
+
+      const costoCalculado = consumo.data * parseFloat(costePorKw);
+
+      
+      setChartData({
+        labels: ['Comparativa'],
+        datasets: [
+          {
+            label: 'Costo Calculado',
+            data: [costoCalculado],
+            backgroundColor: '#FF6384',
+          },
+          {
+            label: 'Costo en Recibo',
+            data: [parseFloat(totalCobro)],
+            backgroundColor: '#36A2EB',
+          },
+        ],
+      });
+
+   
+    } catch (error) {
+      console.error("Error al obtener los datos de la API:", error);
+      alert('Error al obtener los datos de la API.');
+    }
   };
 
   return (
@@ -247,14 +293,10 @@ const ComparativaBoard = () => {
         <TitleMain>Total: kWh</TitleMain>
         <ContentContainer>
           <ChartContainer>
-            {typeof Bar !== 'undefined' ? (
-              <Bar data={chartData} options={options} style={{flexGrow: 1}} />
-            ) : (
-              <p>Cargando gráfico...</p>
-            )}
+            <Bar data={chartData} options={options} style={{ flexGrow: 1 }} />
           </ChartContainer>
           <FormContainer>
-            <h3 style={{color: '#00126E', fontSize: '1.5rem', marginBottom: '20px'}}>Gastos por periodo</h3>
+            <h3 style={{ color: '#00126E', fontSize: '1.5rem', marginBottom: '20px' }}>Gastos por periodo</h3>
             <InputGroup>
               <Label>Inicio:</Label>
               <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />

@@ -259,7 +259,7 @@ const Report = () => {
       <GlobalStyle />
       <ReportContainer>
         <ReportHeader>
-          <ReportTitle>Reporte de Consumo</ReportTitle>
+          <ReportTitle>Reporte de Consumo Mensual</ReportTitle>
           <PDFDownloadLink document={<ReportPDF data={reportData} damageProbs={damageProbs} pieChartImage={pieChartImage} />} fileName="reporte_equipo.pdf">
             {({ blob, url, loading, error }) =>
               loading ? 'Generando PDF...' : <DownloadButton>Descargar PDF</DownloadButton>
