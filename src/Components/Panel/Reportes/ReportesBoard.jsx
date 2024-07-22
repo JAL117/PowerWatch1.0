@@ -15,10 +15,11 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
+
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
-    backgroundColor: '#E4E4E4',
+    backgroundColor: '#ffffff',
     padding: 30,
   },
   section: {
@@ -30,16 +31,59 @@ const styles = StyleSheet.create({
     fontSize: 24,
     textAlign: 'center',
     marginBottom: 20,
+    color: '#00126E',
   },
   text: {
     fontSize: 12,
     marginBottom: 10,
+    color: '#333333',
   },
   image: {
+    marginVertical: 35,
+    width:"500px",
+  },
+  header: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 10,
+    color: '#00126E',
+  },
+  summary: {
+    fontSize: 14,
+    margin: 10,
+    color: '#555555',
+  },
+  suggestions: {
+    margin: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#00126E',
+    borderRadius: 5,
+    backgroundColor: '#f0f0f0',
+  },
+  tableContainer: {
     marginVertical: 15,
-    marginHorizontal: 100,
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#CCCCCC',
+    paddingVertical: 5,
+  },
+  tableHeader: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#00126E',
+  },
+  tableCell: {
+    flex: 1,
+    fontSize: 12,
+    color: '#333333',
   },
 });
+
+
 
 const ReportContainer = styled.div`
   display: flex;
@@ -60,7 +104,7 @@ const ReportHeader = styled.div`
 `;
 
 const ReportTitle = styled.h1`
-  color: #2c3e50;
+  color: #ffffff;
   font-size: 2em;
   margin: 0;
 `;
@@ -198,7 +242,7 @@ const Report = () => {
       <GlobalStyle />
       <ReportContainer style={{borderRadius:"25px"}}>
         <ReportHeader>
-          <ReportTitle style={{color:"#ffff"}}>Reporte de Equipo: {reportData.equipmentName}</ReportTitle>
+          <ReportTitle>Reporte de Consumo</ReportTitle>
           <PDFDownloadLink document={<ReportPDF data={reportData} damageProbs={damageProbs} lineChartImage={lineChartImage} pieChartImage={pieChartImage} />} fileName="reporte_equipo.pdf">
             {({ blob, url, loading, error }) =>
               loading ? 'Generando PDF...' : <DownloadButton>Descargar PDF</DownloadButton>
@@ -258,18 +302,43 @@ const ReportPDF = ({ data, damageProbs, lineChartImage, pieChartImage }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
-        <Text style={styles.title}>Reporte de Equipo: {data.equipmentName}</Text>
+        <Text style={styles.title}>Reporte del Equipo</Text>
         <Text style={styles.text}>Tipo de Consumo: {data.consumptionType}</Text>
         <Text style={styles.text}>Consumo Promedio: {data.averageConsumption} kWh/mes</Text>
-        <Text style={styles.text}>Probabilidades de Daño:</Text>
-        <Text style={styles.text}>Bajo Consumo: {(damageProbs.low * 100).toFixed(2)}%</Text>
-        <Text style={styles.text}>Consumo Medio: {(damageProbs.medium * 100).toFixed(2)}%</Text>
-        <Text style={styles.text}>Alto Consumo: {(damageProbs.high * 100).toFixed(2)}%</Text>
-        {lineChartImage && <Image style={styles.image} src={lineChartImage} />}
+        
+        <Text style={styles.header}>Probabilidades de Daño</Text>
+        <View style={styles.tableContainer}>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableHeader}>Tipo de Consumo</Text>
+            <Text style={styles.tableHeader}>Probabilidad de Daño</Text>
+          </View>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCell}>Bajo Consumo</Text>
+            <Text style={styles.tableCell}>{(damageProbs.low * 100).toFixed(2)}%</Text>
+          </View>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCell}>Consumo Medio</Text>
+            <Text style={styles.tableCell}>{(damageProbs.medium * 100).toFixed(2)}%</Text>
+          </View>
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCell}>Alto Consumo</Text>
+            <Text style={styles.tableCell}>{(damageProbs.high * 100).toFixed(2)}%</Text>
+          </View>
+        </View>
+
         {pieChartImage && <Image style={styles.image} src={pieChartImage} />}
+
+        <Text style={styles.header}>Sugerencias de Mejora</Text>
+        <View style={styles.suggestions}>
+          <Text style={styles.text}>1. Realizar mantenimiento preventivo regular para reducir la probabilidad de fallos en el equipo.</Text>
+          <Text style={styles.text}>2. Capacitar al personal sobre la importancia del uso eficiente de la energía y las mejores prácticas para el mantenimiento del equipo.</Text>
+        </View>
       </View>
     </Page>
   </Document>
 );
+
+
+
 
 export default Report;

@@ -18,7 +18,7 @@ import PrivateRoute from './PrivateRouter';
 const router = createBrowserRouter([
   {
     path: "/AreaCliente",
-    element: <PrivateRoute />, 
+    element: <PrivateRoute/>, 
     children: [
       {
         path: "/AreaCliente",

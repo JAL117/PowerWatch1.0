@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import styled, { keyframes } from 'styled-components';
+import io from 'socket.io-client';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
+
+const socket = io('http://localhost:4000'); // Cambia la URL a tu servidor Socket.IO
 
 const pulse = keyframes`
   0% {
@@ -83,6 +86,12 @@ const LiveIndicator = styled.div`
   background-color: #FFB800;
   border-radius: 50%;
   animation: ${pulse} 2s infinite;
+`;
+
+const WarningMessage = styled.div`
+  font-size: 1.2rem;
+  color: red;
+  margin-top: 20px;
 `;
 
 const options = {
@@ -202,19 +211,20 @@ const Grafica = () => {
     }],
   });
 
+  const [isConnected, setIsConnected] = useState(true);
+  const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulación de datos en tiempo real
+    socket.on('realtime-data', (data) => {
       const newTime = new Date().toLocaleTimeString();
-      const newCorriente = Math.random() * 100;
-      const newVoltaje = Math.random() * 200;
-      const newAmperaje = Math.random() * 50;
+
+      setLastUpdateTime(Date.now());
 
       setCorrienteData(prevData => ({
         labels: [...prevData.labels.slice(-9), newTime],
         datasets: [{
           ...prevData.datasets[0],
-          data: [...prevData.datasets[0].data.slice(-9), newCorriente]
+          data: [...prevData.datasets[0].data.slice(-9), data.corriente]
         }]
       }));
 
@@ -222,7 +232,7 @@ const Grafica = () => {
         labels: [...prevData.labels.slice(-9), newTime],
         datasets: [{
           ...prevData.datasets[0],
-          data: [...prevData.datasets[0].data.slice(-9), newVoltaje]
+          data: [...prevData.datasets[0].data.slice(-9), data.voltaje]
         }]
       }));
 
@@ -230,47 +240,54 @@ const Grafica = () => {
         labels: [...prevData.labels.slice(-9), newTime],
         datasets: [{
           ...prevData.datasets[0],
-          data: [...prevData.datasets[0].data.slice(-9), newAmperaje]
+          data: [...prevData.datasets[0].data.slice(-9), data.amperaje]
         }]
       }));
-    }, 2000);
-
-    // Simulación de datos históricos de kWh
-    const historialKwh = Array.from({length: 12}, () => Math.floor(Math.random() * 500) + 100);
-    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    
-    setKwhHistorialData({
-      labels: meses,
-      datasets: [{
-        label: 'kWh Consumidos',
-        data: historialKwh,
-        backgroundColor: 'rgba(255, 184, 0, 0.6)',
-        borderColor: 'rgba(255, 184, 0, 1)',
-        borderWidth: 1
-      }],
     });
 
-    // Simulación de datos semanales de kWh
-    const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-    const semanasKwh = Array.from({length: 7}, () => Math.floor(Math.random() * 100) + 50);
-    
-    setKwhSemanalData({
-      labels: diasSemana,
-      datasets: [{
-        label: 'kWh Consumidos por Día',
-        data: semanasKwh,
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1
-      }],
+    socket.on('historical-data', (data) => {
+      setKwhHistorialData({
+        labels: data.meses,
+        datasets: [{
+          label: 'kWh Consumidos',
+          data: data.historialKwh,
+          backgroundColor: 'rgba(255, 184, 0, 0.6)',
+          borderColor: 'rgba(255, 184, 0, 1)',
+          borderWidth: 1
+        }],
+      });
+
+      setKwhSemanalData({
+        labels: data.diasSemana,
+        datasets: [{
+          label: 'kWh Consumidos por Día',
+          data: data.semanasKwh,
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }],
+      });
     });
 
-    return () => clearInterval(interval);
-  }, []);
+    const checkConnection = setInterval(() => {
+      if (Date.now() - lastUpdateTime > 5000) { // 5 seconds
+        setIsConnected(false);
+      } else {
+        setIsConnected(true);
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(checkConnection);
+      socket.off('realtime-data');
+      socket.off('historical-data');
+    };
+  }, [lastUpdateTime]);
 
   return (
     <GraficaContainer>
       <GraficaTitle>Consumo de Energía en Tiempo Real</GraficaTitle>
+      {!isConnected && <WarningMessage>No se están recibiendo datos en este momento.</WarningMessage>}
       <GraficaWrapper>
         <GraficaItem>
           <LiveIndicator />

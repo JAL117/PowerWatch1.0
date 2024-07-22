@@ -4,11 +4,12 @@ import { FaChartBar, FaBalanceScale, FaBars, FaUser, FaSignOutAlt, FaBell } from
 import { HiDocumentDownload } from "react-icons/hi";
 import { IoInformationCircle, IoWarning } from "react-icons/io5";
 import styled from 'styled-components';
-import img from "../../Img/Logo.png"
+import img from "../../Img/Logo.png";
 import { Link } from 'react-router-dom';
 import { PiSubtitlesFill } from "react-icons/pi";
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import io from 'socket.io-client';
 
 const TopNavbar = styled(Navbar)`
   background-color: #00126E;
@@ -46,7 +47,7 @@ const LogoContainer = styled.div`
 const Logo = styled.img`
   max-width: ${props => props.isExpanded ? '60%' : '90%'};
   height: auto;
-  margin-top:10px;
+  margin-top: 10px;
   transition: max-width 0.3s ease;
 `;
 
@@ -179,11 +180,7 @@ const SideBar = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isMobile, setIsMobile] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: 'info', message: 'Su plan esta por expirar' },
-    { id: 2, type: 'alert', message: 'Consumo excesivo detectado' },
-    { id: 3, type: 'info', message: 'Su plan esta por expirar' },
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -194,6 +191,22 @@ const SideBar = () => {
     handleResize();
 
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const socket = io(`${import.meta.env.VITE_API_URL}/user/notificacion`);
+
+
+    socket.on('notification', (notification) => {
+      setNotifications((prevNotifications) => [
+        ...prevNotifications,
+        notification,
+      ]);
+    });
+
+    return () => {
+      socket.disconnect(); 
+    };
   }, []);
 
   const userData = JSON.parse(localStorage.getItem('user'));
@@ -235,7 +248,7 @@ const SideBar = () => {
         password2: newPassword,
       }, {
         headers: {
-          'x-token-access':`${token}`,
+          'x-token-access': `${token}`,
         },
       });
 
@@ -264,7 +277,7 @@ const SideBar = () => {
           <ToggleButton onClick={toggleSidebar}>
             <FaBars />
           </ToggleButton>
-          <Navbar.Brand href="/AreaCliente" style={{ fontSize: "clamp(1.5rem , 5vw , 3rem)", marginLeft: "20px" }}> PowerWatch </Navbar.Brand>
+          <Navbar.Brand href="/AreaCliente" style={{ fontSize: "clamp(1.5rem , 5vw , 3rem)", marginLeft: "20px" }}>PowerWatch</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
@@ -377,20 +390,24 @@ const SideBar = () => {
           <StyledOffcanvasTitle>Notificaciones</StyledOffcanvasTitle>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          {notifications.map((notification) => (
-            <NotificationItem key={notification.id}>
-              {notification.type === 'info' ? (
-                <IoInformationCircle color="#3498db" />
-              ) : (
-                <IoWarning color="#e74c3c" />
-              )}
-              <span>{notification.message}</span>
-            </NotificationItem>
-          ))}
+          {notifications.length === 0 ? (
+            <p>No tienes notificaciones</p>
+          ) : (
+            notifications.map((notification) => (
+              <NotificationItem key={notification.id}>
+                {notification.type === 'info' ? (
+                  <IoInformationCircle color="#3498db" />
+                ) : (
+                  <IoWarning color="#e74c3c" />
+                )}
+                <span>{notification.message}</span>
+              </NotificationItem>
+            ))
+          )}
         </Offcanvas.Body>
       </StyledOffcanvas>
     </>
   );
-}
+};
 
 export default SideBar;
