@@ -6,8 +6,6 @@ import io from 'socket.io-client';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
-const socket = io('http://localhost:4000'); // Cambia la URL a tu servidor Socket.IO
-
 const pulse = keyframes`
   0% {
     box-shadow: 0 0 0 0 rgba(255, 184, 0, 0.7);
@@ -27,7 +25,7 @@ const GraficaContainer = styled.div`
   width: calc(100% - 80px);
   margin-left: 80px;
   padding: 2rem;
-  background-color: #f5f5f5;
+  background-color: #f0f4f8;
   min-height: calc(96vh - 60px);
   margin-top: 20px;
 
@@ -211,78 +209,94 @@ const Grafica = () => {
     }],
   });
 
-  const [isConnected, setIsConnected] = useState(true);
+  const [socket, setSocket] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
 
   useEffect(() => {
-    socket.on('realtime-data', (data) => {
-      const newTime = new Date().toLocaleTimeString();
+    const token = localStorage.getItem('token');
+    const userId = JSON.parse(localStorage.getItem('user')).id;
 
-      setLastUpdateTime(Date.now());
-
-      setCorrienteData(prevData => ({
-        labels: [...prevData.labels.slice(-9), newTime],
-        datasets: [{
-          ...prevData.datasets[0],
-          data: [...prevData.datasets[0].data.slice(-9), data.corriente]
-        }]
-      }));
-
-      setVoltajeData(prevData => ({
-        labels: [...prevData.labels.slice(-9), newTime],
-        datasets: [{
-          ...prevData.datasets[0],
-          data: [...prevData.datasets[0].data.slice(-9), data.voltaje]
-        }]
-      }));
-
-      setAmperajeData(prevData => ({
-        labels: [...prevData.labels.slice(-9), newTime],
-        datasets: [{
-          ...prevData.datasets[0],
-          data: [...prevData.datasets[0].data.slice(-9), data.amperaje]
-        }]
-      }));
-    });
-
-    socket.on('historical-data', (data) => {
-      setKwhHistorialData({
-        labels: data.meses,
-        datasets: [{
-          label: 'kWh Consumidos',
-          data: data.historialKwh,
-          backgroundColor: 'rgba(255, 184, 0, 0.6)',
-          borderColor: 'rgba(255, 184, 0, 1)',
-          borderWidth: 1
-        }],
+    if (userId) {
+      const newSocket = io(`${import.meta.env.VITE_API_URL_WS}`, {
+        auth: { token },
+        query: { id_user: userId }
       });
 
-      setKwhSemanalData({
-        labels: data.diasSemana,
-        datasets: [{
-          label: 'kWh Consumidos por Día',
-          data: data.semanasKwh,
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',
-          borderColor: 'rgba(75, 192, 192, 1)',
-          borderWidth: 1
-        }],
-      });
-    });
+      setSocket(newSocket);
 
-    const checkConnection = setInterval(() => {
-      if (Date.now() - lastUpdateTime > 5000) { // 5 seconds
-        setIsConnected(false);
-      } else {
+      newSocket.on('connect', () => {
+        console.log('Conectado al servidor de WebSocket Datas');
         setIsConnected(true);
-      }
-    }, 1000);
+      });
 
-    return () => {
-      clearInterval(checkConnection);
-      socket.off('realtime-data');
-      socket.off('historical-data');
-    };
-  }, [lastUpdateTime]);
+      newSocket.on('disconnect', () => {
+        setIsConnected(false);
+      });
+
+      newSocket.on('datas', (data) => {
+        const newTime = new Date().toLocaleTimeString();
+        setLastUpdateTime(Date.now());
+        console.log(data);
+
+        setCorrienteData(prevData => ({
+          labels: [...prevData.labels.slice(-9), newTime],
+          datasets: [{
+            ...prevData.datasets[0],
+            data: [...prevData.datasets[0].data.slice(-9), data.whs]
+          }]  
+        }));
+
+        setVoltajeData(prevData => ({
+          labels: [...prevData.labels.slice(-9), newTime],
+          datasets: [{
+            ...prevData.datasets[0],
+            data: [...prevData.datasets[0].data.slice(-9), data.voltaje]
+          }]
+        }));
+
+        setAmperajeData(prevData => ({
+          labels: [...prevData.labels.slice(-9), newTime],
+          datasets: [{
+            ...prevData.datasets[0],
+            data: [...prevData.datasets[0].data.slice(-9), data.ampers]
+          }]
+        }));
+      });
+
+      newSocket.on('historical-data', (data) => {
+        setKwhHistorialData({
+          labels: data.meses,
+          datasets: [{
+            label: 'kWh Consumidos',
+            data: data.historialKwh,
+            backgroundColor: 'rgba(255, 184, 0, 0.6)',
+            borderColor: 'rgba(255, 184, 0, 1)',
+            borderWidth: 1
+          }],
+        });
+
+        setKwhSemanalData({
+          labels: data.diasSemana,
+          datasets: [{
+            label: 'kWh Consumidos por Día',
+            data: data.semanasKwh,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }],
+        });
+      });
+
+      return () => {
+        newSocket.disconnect();
+        newSocket.off('connect');
+        newSocket.off('disconnect');
+        newSocket.off('realtime-data');
+        newSocket.off('historical-data');
+      };
+    }
+  }, []);
 
   return (
     <GraficaContainer>

@@ -181,6 +181,7 @@ const SideBar = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isMobile, setIsMobile] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [socket, setSocket] = useState(null); 
 
   useEffect(() => {
     const handleResize = () => {
@@ -194,19 +195,32 @@ const SideBar = () => {
   }, []);
 
   useEffect(() => {
-    const socket = io(`${import.meta.env.VITE_API_URL}/user/notificacion`);
+    const token = localStorage.getItem('token');
+    const userId = JSON.parse(localStorage.getItem('user')).id;
 
+    if (token && userId) {
+      const newSocket = io(`${import.meta.env.VITE_API_URL_WS}`, {
+        auth: { token },
+        query: { id_user: userId }
+      });
 
-    socket.on('notification', (notification) => {
-      setNotifications((prevNotifications) => [
-        ...prevNotifications,
-        notification,
-      ]);
-    });
+      setSocket(newSocket);
 
-    return () => {
-      socket.disconnect(); 
-    };
+      newSocket.on('connect', () => {
+        console.log('Conectado al servidor de WebSocket');
+      });
+
+      newSocket.on('notification-alerts', (notification) => {
+        setNotifications((prevNotifications) => [
+          ...prevNotifications,
+          notification
+        ]);
+      });
+
+      return () => {
+        newSocket.disconnect();
+      };
+    }
   }, []);
 
   const userData = JSON.parse(localStorage.getItem('user'));

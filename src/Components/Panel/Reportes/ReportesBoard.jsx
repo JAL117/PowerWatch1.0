@@ -1,20 +1,129 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import styled, { createGlobalStyle } from 'styled-components';
-import { Line, Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const GlobalStyle = createGlobalStyle`
   html, body, #root {
-    height: 100%;
+    height: 90%;
     margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
+    padding: 30px;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f4f8;
   }
 `;
 
+const ReportContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-width: 1600px;
+  margin: 40px auto;
+  padding: 40px;
+  background-color: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 18, 110, 0.1);
+  border-radius: 20px;
+  margin-left:100px;
+`;
+
+const ReportHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e6ed;
+`;
+
+const ReportTitle = styled.h1`
+  color: #00126E;
+  font-size: 2.5em;
+  font-weight: 700;
+  margin: 0;
+`;
+
+const DownloadButton = styled.button`
+  background-color: #00126E;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 18, 110, 0.1);
+
+  &:hover {
+    background-color: #000d4d;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 18, 110, 0.2);
+  }
+`;
+
+const ReportContent = styled.div`
+  display: flex;
+  gap: 30px;
+`;
+
+const ReportSection = styled.div`
+  flex: 1;
+  background-color: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const SectionTitle = styled.h2`
+  color: #00126E;
+  font-size: 1.8em;
+  margin-bottom: 20px;
+  font-weight: 600;
+`;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+`;
+
+const Th = styled.th`
+  background-color: #00126E;
+  color: white;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  &:first-child {
+    border-top-left-radius: 10px;
+  }
+  &:last-child {
+    border-top-right-radius: 10px;
+  }
+`;
+
+const Td = styled.td`
+  padding: 15px;
+  border-bottom: 1px solid #e0e6ed;
+`;
+
+const InfoText = styled.p`
+  font-size: 1.1em;
+  color: #4a5568;
+  margin-bottom: 10px;
+`;
+
+const ChartContainer = styled.div`
+  height: 300px;
+  margin-top: 20px;
+`;
 
 const styles = StyleSheet.create({
   page: {
@@ -40,13 +149,15 @@ const styles = StyleSheet.create({
   },
   image: {
     marginVertical: 35,
-    width:"500px",
+    width: "300px",
+    marginHorizontal:90,
   },
   header: {
     fontSize: 18,
     textAlign: 'center',
     marginBottom: 10,
     color: '#00126E',
+    marginTop:10
   },
   summary: {
     fontSize: 14,
@@ -83,96 +194,15 @@ const styles = StyleSheet.create({
   },
 });
 
-
-
-const ReportContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 50px;
-  background-color: #00126E;
-  box-sizing: border-box;
-`;
-
-const ReportHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-`;
-
-const ReportTitle = styled.h1`
-  color: #ffffff;
-  font-size: 2em;
-  margin: 0;
-`;
-
-const DownloadButton = styled.button`
-  background-color: #3498db;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #2980b9;
-  }
-`;
-
-const ReportContent = styled.div`
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-`;
-
-const ReportSection = styled.div`
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-`;
-
-const SectionTitle = styled.h2`
-  color: #34495e;
-  font-size: 1.5em;
-  margin-bottom: 15px;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-`;
-
-const Th = styled.th`
-  background-color: #3498db;
-  color: white;
-  padding: 10px;
-  text-align: left;
-`;
-
-const Td = styled.td`
-  padding: 10px;
-  border-bottom: 1px solid #ecf0f1;
-`;
-
 const Report = () => {
   const [reportData, setReportData] = useState(null);
   const [damageProbs, setDamageProbs] = useState(null);
-  const lineChartRef = useRef(null);
   const pieChartRef = useRef(null);
-  const [lineChartImage, setLineChartImage] = useState(null);
   const [pieChartImage, setPieChartImage] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       const data = {
-        equipmentName: "Equipo A",
         consumptionType: "Medio",
         averageConsumption: 450,
         monthlyConsumption: [420, 440, 460, 430, 470, 450],
@@ -203,28 +233,15 @@ const Report = () => {
   }, []);
 
   useEffect(() => {
-    if (lineChartRef.current && pieChartRef.current) {
-      setLineChartImage(lineChartRef.current.toBase64Image());
-      setPieChartImage(pieChartRef.current.toBase64Image());
+    if (pieChartRef.current) {
+      const img = pieChartRef.current.toBase64Image();
+      setPieChartImage(img);
     }
   }, [reportData, damageProbs]);
 
   if (!reportData || !damageProbs) {
     return <div>Cargando...</div>;
   }
-
-  const consumptionChartData = {
-    labels: ['Mes 1', 'Mes 2', 'Mes 3', 'Mes 4', 'Mes 5', 'Mes 6'],
-    datasets: [
-      {
-        label: 'Consumo Mensual (kWh)',
-        data: reportData.monthlyConsumption,
-        fill: false,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-      },
-    ],
-  };
 
   const probChartData = {
     labels: ['Bajo Consumo', 'Consumo Medio', 'Alto Consumo'],
@@ -238,12 +255,12 @@ const Report = () => {
   };
 
   return (
-    <div style={{marginLeft:"5%"}}>
+    <>
       <GlobalStyle />
-      <ReportContainer style={{borderRadius:"25px"}}>
+      <ReportContainer>
         <ReportHeader>
           <ReportTitle>Reporte de Consumo</ReportTitle>
-          <PDFDownloadLink document={<ReportPDF data={reportData} damageProbs={damageProbs} lineChartImage={lineChartImage} pieChartImage={pieChartImage} />} fileName="reporte_equipo.pdf">
+          <PDFDownloadLink document={<ReportPDF data={reportData} damageProbs={damageProbs} pieChartImage={pieChartImage} />} fileName="reporte_equipo.pdf">
             {({ blob, url, loading, error }) =>
               loading ? 'Generando PDF...' : <DownloadButton>Descargar PDF</DownloadButton>
             }
@@ -252,14 +269,8 @@ const Report = () => {
         <ReportContent>
           <ReportSection>
             <SectionTitle>Información General</SectionTitle>
-            <p>Tipo de Consumo: {reportData.consumptionType}</p>
-            <p>Consumo Promedio: {reportData.averageConsumption} kWh/mes</p>
-          </ReportSection>
-          <ReportSection>
-            <SectionTitle>Consumo Mensual</SectionTitle>
-            <div style={{ height: '200px' }}>
-              <Line ref={lineChartRef} data={consumptionChartData} options={{ responsive: true, maintainAspectRatio: false }} />
-            </div>
+            <InfoText>Tipo de Consumo: {reportData.consumptionType}</InfoText>
+            <InfoText>Consumo Promedio: {reportData.averageConsumption} kWh/mes</InfoText>
           </ReportSection>
           <ReportSection>
             <SectionTitle>Probabilidades de Daño</SectionTitle>
@@ -288,17 +299,17 @@ const Report = () => {
           </ReportSection>
           <ReportSection>
             <SectionTitle>Gráfico de Probabilidades</SectionTitle>
-            <div style={{ height: '200px' }}>
+            <ChartContainer>
               <Pie ref={pieChartRef} data={probChartData} options={{ responsive: true, maintainAspectRatio: false }} />
-            </div>
+            </ChartContainer>
           </ReportSection>
         </ReportContent>
       </ReportContainer>
-    </div>
+    </>
   );
 };
 
-const ReportPDF = ({ data, damageProbs, lineChartImage, pieChartImage }) => (
+const ReportPDF = ({ data, damageProbs, pieChartImage }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
@@ -337,8 +348,5 @@ const ReportPDF = ({ data, damageProbs, lineChartImage, pieChartImage }) => (
     </Page>
   </Document>
 );
-
-
-
 
 export default Report;

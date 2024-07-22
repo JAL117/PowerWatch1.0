@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import img from "../../Img/Detective.png";
 import { Button } from 'react-bootstrap';
 import { FaBolt, FaMobileAlt, FaChartLine, FaTools, FaMoneyBillWave } from 'react-icons/fa';
 
@@ -34,32 +33,16 @@ const TextContent = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-size: clamp(3rem, 5vw, 4.5rem);
   margin-bottom: 1rem;
   color: #00126E;
 `;
 
 const Description = styled.p`
-  font-size: clamp(1rem, 2vw, 1.1rem);
+  font-size: clamp(2rem, 5vw, 1.1rem);
   line-height: 1.6;
   color: #555;
   margin-bottom: 2rem;
-`;
-
-const Image = styled.img`
-  max-width: 100%;
-  height: auto;
-  border-radius: 10px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-
-  @media (min-width: 768px) {
-    max-width: 50%;
-  }
-
-  &:hover {
-    transform: scale(1.05);
-  }
 `;
 
 const FeaturesContainer = styled.div`
@@ -91,13 +74,13 @@ const FeatureIcon = styled.div`
 `;
 
 const FeatureTitle = styled.h3`
-  font-size: 1.2rem;
+  font-size: 2rem;
   color: #00126E;
   margin-bottom: 0.5rem;
 `;
 
 const FeatureDescription = styled.p`
-  font-size: 0.9rem;
+  font-size: 1.5rem;
   color: #555;
 `;
 
@@ -110,13 +93,13 @@ const DeviceSection = styled.div`
 `;
 
 const DeviceTitle = styled.h2`
-  font-size: 2rem;
+  font-size: 3rem;
   color: #00126E;
   margin-bottom: 1rem;
 `;
 
 const DeviceDescription = styled.p`
-  font-size: 1rem;
+  font-size: 1.5rem;
   color: #555;
   margin-bottom: 2rem;
 `;
@@ -187,7 +170,7 @@ const Welcome = () => {
       <Content>
         <TextContent>
           <Title>Bienvenido a Powerwatch</Title>
-          <Description>
+          <Description className='mt-5 mb-5'>
             Gracias por unirte a nuestra plataforma de monitoreo de energía avanzada. Con PowerWatch, podrás supervisar y optimizar tu consumo energético de manera eficiente y sostenible. Estamos aquí para ayudarte a tomar el control y maximizar la eficiencia de tu uso de energía.
           </Description>
           <FeaturesContainer>
@@ -201,14 +184,10 @@ const Welcome = () => {
               <FeatureTitle>Análisis Detallado</FeatureTitle>
               <FeatureDescription>Obtén informes detallados y gráficos para entender mejor tu consumo.</FeatureDescription>
             </Feature>
-            <Feature>
-              <FeatureIcon><FaMobileAlt /></FeatureIcon>
-              <FeatureTitle>Control Móvil</FeatureTitle>
-              <FeatureDescription>Accede a tus datos y monitorea tu consumo energía desde cualquier lugar.</FeatureDescription>
-            </Feature>
+       
           </FeaturesContainer>
         </TextContent>
-        <Image src={img} alt="Detective de energía" />
+     
       </Content>
       <DeviceSection>
         <DeviceTitle>Dispositivos Power Watch</DeviceTitle>
