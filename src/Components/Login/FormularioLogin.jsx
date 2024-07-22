@@ -370,7 +370,7 @@ function FormularioLogin() {
           className="mt-3 mr-3"
           variant="link"
           style={{ color: "#ffff", fontSize: "1rem" }}
-          onClick={handleShowRegister} // Mostrar el modal de registro
+          onClick={handleShowRegister} 
         >
           Registrarse
         </Button>

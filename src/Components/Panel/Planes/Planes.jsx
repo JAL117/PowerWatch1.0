@@ -122,7 +122,7 @@ const Planes = () => {
         const planId = plan === 'mensual' ? 1 : plan === 'anual' ? 2 : 1;
 
         try {
-            await axios.put('https://api-piweb.piweb.lat/plan/assignPlan', {
+            await axios.put(`${import.meta.env.VITE_API_URL}plan/assignPlan`, {
                 email: user.email,
                 plan: planId
             }, {
@@ -160,7 +160,7 @@ const Planes = () => {
         const fecha = new Date().toISOString().split('T')[0];
 
         try {
-            const response = await axios.post('https://api-piweb.piweb.lat/payments/generate', {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}payments/generate`, {
                 ...formData,
                 fecha: fecha,
                 email: user.email,

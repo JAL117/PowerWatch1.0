@@ -211,12 +211,12 @@ const SideBar = () => {
       });
 
       newSocket.on('notification-alerts', (notification) => {
+        console.log(notification);
         setNotifications((prevNotifications) => [
           ...prevNotifications,
           notification
         ]);
       });
-
       return () => {
         newSocket.disconnect();
       };
@@ -409,7 +409,7 @@ const SideBar = () => {
           ) : (
             notifications.map((notification) => (
               <NotificationItem key={notification.id}>
-                {notification.type === 'info' ? (
+                {notification.tipo === 'info' ? (
                   <IoInformationCircle color="#3498db" />
                 ) : (
                   <IoWarning color="#e74c3c" />

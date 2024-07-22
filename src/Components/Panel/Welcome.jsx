@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Button } from 'react-bootstrap';
-import { FaBolt, FaMobileAlt, FaChartLine, FaTools, FaMoneyBillWave } from 'react-icons/fa';
+import { Button, Form, Modal, Container, Row, Col } from 'react-bootstrap';
+import { FaBolt, FaMobileAlt, FaChartLine, FaTools, FaMoneyBillWave, FaCreditCard, FaRegClock, FaFileAlt, FaCalendarAlt, FaMapMarkerAlt, FaMobile } from 'react-icons/fa';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 const WelcomeContainer = styled.div`
   display: flex;
@@ -152,7 +154,7 @@ const DeviceOptionFeature = styled.li`
   }
 `;
 
-const PurchaseButton = styled(Button)`
+const StyledButton = styled(Button)`
   background-color: #00126E;
   border: none;
   padding: 10px 20px;
@@ -165,8 +167,118 @@ const PurchaseButton = styled(Button)`
 `;
 
 const Welcome = () => {
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [planDate, setPlanDate] = useState('');
+  const [address, setAddress] = useState({
+    street: '',
+    number: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    references: '',
+  });
+  const [formData, setFormData] = useState({
+    tarjeta: '',
+    cvv: '',
+    fecha: '',
+    metodoPago: 'tarjeta',
+    monto: 0,
+    paquete: 1,
+    direccion: ''
+  });
+
+  useEffect(() => {
+    const savedValue = JSON.parse(localStorage.getItem('user'));
+    if (savedValue && savedValue.plan != null) {
+      setPlanDate(savedValue.plan.split("T")[0]);
+    }
+  }, []);
+
+  const handleCompra = async (plan) => {
+    setSelectedPlan(plan);
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('token');
+    const planId = plan === 'dispositivo' ? 1 : plan === 'dispositivo-instalacion' ? 2 : 1;
+
+    try {
+      await axios.put(`${import.meta.env.VITE_API_URL}/plan/assignPlan`, {
+        email: user.email,
+        plan: planId
+      }, {
+        headers: {
+          'x-token-access': token
+        }
+      });
+
+      if (plan === 'dispositivo' || plan === 'dispositivo-instalacion') {
+        setShowAddressForm(true);
+      } else {
+        setShowPaymentForm(true);
+      }
+    } catch (error) {
+      console.error('Error al asignar el plan:', error);
+    }
+  };
+
+  const handleCloseForm = () => {
+    setShowAddressForm(false);
+    setShowPaymentForm(false);
+  };
+
+  const handleAddressSubmit = (e) => {
+    e.preventDefault();
+    setShowAddressForm(false);
+    setShowPaymentForm(true);
+  };
+
+  const handleSubmitPayment = async (e) => {
+    e.preventDefault();
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('token');
+    const monto = selectedPlan === 'dispositivo' ? 3500 : selectedPlan === 'dispositivo-instalacion' ? 4100 : 0; // Ajusta el monto según el plan
+    const fecha = new Date().toISOString().split('T')[0];
+
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/payments/generate`, {
+        ...formData,
+        fecha: fecha,
+        email: user.email,
+        monto: monto,
+        paquete: selectedPlan === 'dispositivo' ? 1 : selectedPlan === 'dispositivo-instalacion' ? 2 : 1,
+        direccion: '' 
+      }, {
+        headers: {
+          'x-token-access': token
+        }
+      });
+
+      const newPlanDate = response.data.data[1];
+      const updatedUser = { ...user, plan: newPlanDate };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setPlanDate(newPlanDate.split("T")[0]);
+
+      Swal.fire({
+        title: 'Pago procesado con éxito',
+        icon: 'success',
+        confirmButtonText: 'Aceptar'
+      });
+
+      handleCloseForm();
+    } catch (error) {
+      console.error('Error al procesar el pago:', error);
+      Swal.fire({
+        title: 'Error al procesar el pago',
+        text: 'Hubo un problema al procesar su pago. Por favor, intente nuevamente.',
+        icon: 'error',
+        confirmButtonText: 'Aceptar'
+      });
+    }
+  };
+
   return (
-    <WelcomeContainer style={{marginTop:"8%"}}>
+    <WelcomeContainer style={{ marginTop: "8%" }}>
       <Content>
         <TextContent>
           <Title>Bienvenido a Powerwatch</Title>
@@ -184,10 +296,8 @@ const Welcome = () => {
               <FeatureTitle>Análisis Detallado</FeatureTitle>
               <FeatureDescription>Obtén informes detallados y gráficos para entender mejor tu consumo.</FeatureDescription>
             </Feature>
-       
           </FeaturesContainer>
         </TextContent>
-     
       </Content>
       <DeviceSection>
         <DeviceTitle>Dispositivos Power Watch</DeviceTitle>
@@ -202,7 +312,7 @@ const Welcome = () => {
               <DeviceOptionFeature><FaMobileAlt /> Dispositivo Power Watch</DeviceOptionFeature>
               <DeviceOptionFeature><FaChartLine /> Monitoreo en tiempo real</DeviceOptionFeature>
             </DeviceOptionDescription>
-            <PurchaseButton>Comprar Ahora</PurchaseButton>
+            <StyledButton onClick={() => handleCompra('dispositivo')}>Comprar Ahora</StyledButton>
           </DeviceOption>
           <DeviceOption>
             <DeviceOptionTitle>Dispositivo + Instalación</DeviceOptionTitle>
@@ -212,12 +322,138 @@ const Welcome = () => {
               <DeviceOptionFeature><FaTools /> Instalación profesional</DeviceOptionFeature>
               <DeviceOptionFeature><FaChartLine /> Monitoreo en tiempo real</DeviceOptionFeature>
             </DeviceOptionDescription>
-            <PurchaseButton>Comprar Ahora</PurchaseButton>
+            <StyledButton onClick={() => handleCompra('dispositivo-instalacion')}>Comprar Ahora</StyledButton>
           </DeviceOption>
         </DeviceOptions>
       </DeviceSection>
+
+      <Modal show={showAddressForm} onHide={handleCloseForm} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Dirección de Envío - {selectedPlan === 'dispositivo' ? 'Dispositivo Power Watch' : 'Dispositivo + Instalación'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleAddressSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label><FaMapMarkerAlt /> Calle</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Calle"
+                required
+                value={address.street}
+                onChange={(e) => setAddress({ ...address, street: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Número</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Número"
+                required
+                value={address.number}
+                onChange={(e) => setAddress({ ...address, number: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Ciudad</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Ciudad"
+                required
+                value={address.city}
+                onChange={(e) => setAddress({ ...address, city: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Estado</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Estado"
+                required
+                value={address.state}
+                onChange={(e) => setAddress({ ...address, state: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Código Postal</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Código Postal"
+                required
+                value={address.zipCode}
+                onChange={(e) => setAddress({ ...address, zipCode: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Referencias</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Referencias para la entrega"
+                value={address.references}
+                onChange={(e) => setAddress({ ...address, references: e.target.value })}
+              />
+            </Form.Group>
+            <StyledButton type="submit" className="w-100">
+              Continuar al Pago
+            </StyledButton>
+          </Form>
+        </Modal.Body>
+      </Modal>
+
+      <Modal show={showPaymentForm} onHide={handleCloseForm} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Formulario de Pago - {selectedPlan === 'dispositivo' ? 'Dispositivo Power Watch' : selectedPlan === 'dispositivo-instalacion' ? 'Dispositivo + Instalación' : null}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleSubmitPayment}>
+            <Form.Group className="mb-3">
+              <Form.Label><FaCreditCard /> Número de Tarjeta</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="1234 5678 9012 3456"
+                required
+                value={formData.tarjeta}
+                onChange={(e) => setFormData({ ...formData, tarjeta: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Nombre en la Tarjeta</Form.Label>
+              <Form.Control type="text" placeholder="John Doe" required />
+            </Form.Group>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Fecha de Expiración</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="MM/AA"
+                    required
+                    value={formData.fecha}
+                    onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>CVV</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="123"
+                    required
+                    value={formData.cvv}
+                    onChange={(e) => setFormData({ ...formData, cvv: e.target.value })}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <StyledButton type="submit" className="w-100">
+              Procesar Pago
+            </StyledButton>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </WelcomeContainer>
   );
-}
+};
 
 export default Welcome;
