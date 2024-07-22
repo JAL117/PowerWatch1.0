@@ -5,6 +5,8 @@ import { FaUsers, FaUserPlus, FaPhone } from "react-icons/fa";
 import { MdOutlineDriveFileRenameOutline, MdEmail } from "react-icons/md";
 import { RiLockPasswordFill } from "react-icons/ri";
 import logo from "../../Img/Logo.png";
+import axios from "axios";
+import Swal from 'sweetalert2';
 
 const NavbarHome = () => {
   const [showModal, setShowModal] = useState(false);
@@ -26,7 +28,43 @@ const NavbarHome = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     handleClose();
-    // Aquí iría la lógica para enviar los datos al servidor
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/user`, {
+        id: "",
+        nombre: formData.name,
+        apellidos: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        telefono: formData.phone,
+        fechaPlan: null,
+      });
+      if (response.status === 200) {
+        console.log("Usuario registrado exitosamente");
+        console.log(response.data);
+        localStorage.setItem('token', response.data.token);
+        showSuccessAlert(); 
+      } else {
+        console.error("Error al registrar usuario");
+      }
+    } catch (error) {
+      console.error("Error de red:", error);
+    }
+  };
+
+  const showSuccessAlert = () => {
+    Swal.fire({
+      title: '¡Registro Completo!',
+      text: 'Para recibir notificaciones por WhatsApp, envía un mensaje con el texto "join saddle-neck" al número +1 415 523 8886.',
+      icon: 'success',
+      confirmButtonText: 'Ok',
+      confirmButtonColor: '#FFB800',
+      customClass: {
+        popup: 'swal2-popup',
+        title: 'swal2-title',
+        content: 'swal2-content',
+        confirmButton: 'swal2-confirm-button'
+      }
+    });
   };
 
   const styles = {

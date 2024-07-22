@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Route } from "react-router-dom";
 import LayoutHome from "./Pages/Layouts/LayoutHome";
 import LayoutPanel from "./Pages/Layouts/LayoutPanel";
 import Login from "./Pages/Login";
@@ -13,32 +13,38 @@ import Graficas from "./Pages/Graficas";
 import Comparativas from "./Pages/Comparativas";
 import Planes from "./Pages/Planes";
 import Reportes from "./Pages/Reportes";
-
+import PrivateRoute from './PrivateRouter';
 
 const router = createBrowserRouter([
   {
     path: "/AreaCliente",
-    element: <LayoutPanel />,
+    element: <PrivateRoute/>, 
     children: [
       {
-        index: true,
-        element: <Panel />,
-      },
-      {
-        path: "Graficas",
-        element: <Graficas />,
-      },
-      {
-        path: "Comparativa",
-        element: <Comparativas />,
-      },
-      {
-        path: "Reportes",
-        element:<Reportes/>,
-      },
-      {
-        path: "Planes",
-        element:<Planes/>,
+        path: "/AreaCliente",
+        element: <LayoutPanel />,
+        children: [
+          {
+            index: true,
+            element: <Panel />,
+          },
+          {
+            path: "Graficas",
+            element: <Graficas />,
+          },
+          {
+            path: "Comparativa",
+            element: <Comparativas />,
+          },
+          {
+            path: "Reportes",
+            element: <Reportes />,
+          },
+          {
+            path: "Planes",
+            element: <Planes />,
+          },
+        ],
       },
     ],
   },

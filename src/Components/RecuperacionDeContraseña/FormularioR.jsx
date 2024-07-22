@@ -1,19 +1,70 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import styled from "styled-components";
+
+const StyledContainer = styled(Container)`
+  height: 80vh;
+  display: flex;
+  align-items: center;
+  background: #f5f5f5;
+`;
+
+const StyledCard = styled.div`
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+`;
+
+const StyledTitle = styled.h2`
+  color: #4a4a4a;
+  margin-bottom: 30px;
+  font-weight: 700;
+`;
+
+const StyledForm = styled(Form)`
+  .form-group {
+    margin-bottom: 25px;
+  }
+
+  .form-control {
+    border-radius: 10px;
+    border: 1px solid #ced4da;
+    padding: 12px;
+    transition: all 0.3s ease;
+
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(106, 142, 251, 0.25);
+      border-color: #6a8efb;
+    }
+  }
+
+  .btn-primary {
+    background-color: #6a8efb;
+    border-color: #6a8efb;
+    border-radius: 10px;
+    padding: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #5a7ee9;
+      border-color: #5a7ee9;
+    }
+  }
+`;
 
 const FormularioR = () => {
- 
   const query = new URLSearchParams(useLocation().search);
   const token = query.get("token");
   const email = query.get("email");
+  const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showForm, setShowForm] = useState(true); 
- 
-
-
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -22,20 +73,17 @@ const FormularioR = () => {
       showErrorAlert("Las contraseñas no coinciden");
       return;
     }
-
-    showSuccessAlert("Token y email validados correctamente");
-
-    const response = await fetch("/api/reset-password", {
-      method: "POST",
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/passrecover`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ token, email, password }),
+      body: JSON.stringify({ email: email, passnew: password }),
     });
 
     if (response.ok) {
       showSuccessAlert("Contraseña restablecida con éxito");
-      history.push("/");
+      navigate("/");
     } else {
       showErrorAlert("Error al restablecer la contraseña");
     }
@@ -58,14 +106,14 @@ const FormularioR = () => {
   };
 
   return (
-    <Container>
-      <Row className="justify-content-center mt-5">
-        <Col md={6}>
-          <div className="text-center">
-            <h2>Restablecer Contraseña</h2>
-          </div>
-          {showForm && (
-            <Form onSubmit={handleSubmit}>
+    <StyledContainer fluid>
+      <Row className="justify-content-center w-100">
+        <Col md={6} lg={4}>
+          <StyledCard>
+            <div className="text-center">
+              <StyledTitle>Restablecer Contraseña</StyledTitle>
+            </div>
+            <StyledForm onSubmit={handleSubmit}>
               <Form.Group controlId="formPassword">
                 <Form.Label>Nueva Contraseña:</Form.Label>
                 <Form.Control
@@ -84,14 +132,14 @@ const FormularioR = () => {
                   required
                 />
               </Form.Group>
-              <Button variant="primary" type="submit" className="btn-block">
+              <Button variant="primary" type="submit" className="w-100 mt-4">
                 Restablecer Contraseña
               </Button>
-            </Form>
-          )}
+            </StyledForm>
+          </StyledCard>
         </Col>
       </Row>
-    </Container>
+    </StyledContainer>
   );
 };
 

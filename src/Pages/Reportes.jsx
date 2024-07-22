@@ -1,6 +1,7 @@
 import React from "react";
 import SideBar from "../Components/Panel/SideBar";
 import Animaciones from "../Components/common/animaciones";
+import Report from "../Components/Panel/Reportes/ReportesBoard";
 
 const Reportes = () => {
   return (
@@ -8,7 +9,7 @@ const Reportes = () => {
       <SideBar />
       <Animaciones>
         <div style={{ marginTop: "8%" }}>
-         <>Holaaa soy reportes , hola mundo weyes</>
+         <Report/>
         </div>
       </Animaciones>
     </div>

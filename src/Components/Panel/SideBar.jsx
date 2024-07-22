@@ -1,15 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { Navbar, Nav, Container, Button, Offcanvas, Form, Badge } from "react-bootstrap";
-import { FaChartBar, FaBalanceScale, FaBars, FaUser, FaSignOutAlt, FaBell } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import {
+  Navbar,
+  Nav,
+  Container,
+  Button,
+  Offcanvas,
+  Form,
+  Badge,
+} from "react-bootstrap";
+import {
+  FaChartBar,
+  FaBalanceScale,
+  FaBars,
+  FaUser,
+  FaSignOutAlt,
+  FaBell,
+} from "react-icons/fa";
 import { HiDocumentDownload } from "react-icons/hi";
 import { IoInformationCircle, IoWarning } from "react-icons/io5";
-import styled from 'styled-components';
-import img from "../../Img/Logo.png"
-import { Link } from 'react-router-dom';
+import styled from "styled-components";
+import img from "../../Img/Logo.png";
+import { Link } from "react-router-dom";
 import { PiSubtitlesFill } from "react-icons/pi";
+import axios from "axios";
+import Swal from "sweetalert2";
+import io from "socket.io-client";
+import { IoLogoWhatsapp } from 'react-icons/io5';
 
 const TopNavbar = styled(Navbar)`
-  background-color: #00126E;
+  background-color: #00126e;
   padding: 10px 25px;
   position: fixed;
   top: 0;
@@ -18,11 +37,63 @@ const TopNavbar = styled(Navbar)`
   z-index: 1030;
 `;
 
+const IconWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #e6f3ff;
+  margin-right: 16px;
+`;
+
+const ContentWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
+
+
+const Title = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffff;
+  margin: 0 0 8px 0;
+`;
+
+const Description = styled.p`
+  font-size: 14px;
+  color: #fff;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+`;
+
+const HighlightText = styled.span`
+  font-weight: 600;
+  color: #2980b9;
+  background-color: #e8f6fe;
+  padding: 2px 4px;
+  border-radius: 4px;
+`;
+
+const PhoneNumber = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  color: #27ae60;
+  font-weight: 600;
+
+  svg {
+    margin-right: 8px;
+  }
+`;
+
 const SidebarContainer = styled.div`
-  background: linear-gradient(180deg, #00126E 0%, #001E9C 100%);
+  background: linear-gradient(180deg, #00126e 0%, #001e9c 100%);
   color: white;
   height: calc(100vh - 56px);
-  width: ${props => props.isExpanded ? '250px' : '80px'};
+  width: ${(props) => (props.isExpanded ? "250px" : "80px")};
   position: fixed;
   top: 100px;
   left: 0;
@@ -31,8 +102,8 @@ const SidebarContainer = styled.div`
   z-index: 1020;
 
   @media (max-width: 768px) {
-    width: ${props => props.isExpanded ? '250px' : '0'};
-    left: ${props => props.isExpanded ? '0' : '-70px'};
+    width: ${(props) => (props.isExpanded ? "250px" : "0")};
+    left: ${(props) => (props.isExpanded ? "0" : "-70px")};
   }
 `;
 
@@ -42,9 +113,9 @@ const LogoContainer = styled.div`
 `;
 
 const Logo = styled.img`
-  max-width: ${props => props.isExpanded ? '60%' : '90%'};
+  max-width: ${(props) => (props.isExpanded ? "60%" : "90%")};
   height: auto;
-  margin-top:10px;
+  margin-top: 10px;
   transition: max-width 0.3s ease;
 `;
 
@@ -55,8 +126,9 @@ const ToggleButton = styled.button`
   font-size: 1.5rem;
   cursor: pointer;
 
-  &:hover, &:focus {
-    color: #FFB800;
+  &:hover,
+  &:focus {
+    color: #ffb800;
   }
 `;
 
@@ -68,39 +140,41 @@ const StyledNav = styled(Nav)`
 const StyledButton = styled.button`
   color: white;
   background: transparent;
-  border: 2px solid #FFB800;
+  border: 2px solid #ffb800;
   border-radius: 30px;
-  padding: ${props => props.isExpanded ? '10px 20px' : '10px'};
+  padding: ${(props) => (props.isExpanded ? "10px 20px" : "10px")};
   margin-bottom: 20px;
   transition: all 0.3s ease;
-  width: ${props => props.isExpanded ? '100%' : '50px'};
+  width: ${(props) => (props.isExpanded ? "100%" : "50px")};
   text-align: left;
   display: flex;
   align-items: center;
-  justify-content: ${props => props.isExpanded ? 'flex-start' : 'center'};
+  justify-content: ${(props) => (props.isExpanded ? "flex-start" : "center")};
   cursor: pointer;
 
-  &:hover, &:focus {
-    background: #FFB800;
-    color: #00126E;
+  &:hover,
+  &:focus {
+    background: #ffb800;
+    color: #00126e;
   }
 
   svg {
-    margin-right: ${props => props.isExpanded ? '10px' : '0'};
+    margin-right: ${(props) => (props.isExpanded ? "10px" : "0")};
     font-size: 1.2rem;
   }
 `;
 
 const ButtonText = styled.span`
   margin-left: 10px;
-  opacity: ${props => props.isExpanded ? 1 : 0};
+  opacity: ${(props) => (props.isExpanded ? 1 : 0)};
   transition: opacity 0.3s ease;
-  display: ${props => props.isExpanded ? 'inline' : 'none'};
+  display: ${(props) => (props.isExpanded ? "inline" : "none")};
 `;
 
 const StyledOffcanvas = styled(Offcanvas)`
-  .offcanvas-header, .offcanvas-body {
-    background: linear-gradient(180deg, #00126E 0%, #001E9C 100%);
+  .offcanvas-header,
+  .offcanvas-body {
+    background: linear-gradient(180deg, #00126e 0%, #001e9c 100%);
     color: white;
   }
 
@@ -110,18 +184,18 @@ const StyledOffcanvas = styled(Offcanvas)`
 `;
 
 const StyledOffcanvasTitle = styled(Offcanvas.Title)`
-  color: #FFFF;
+  color: #ffff;
   font-size: 1.5rem;
 `;
 
 const StyledForm = styled(Form)`
   label {
-    color: #FFFF;
+    color: #ffff;
   }
 
   input {
     background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid #FFFF;
+    border: 1px solid #ffff;
     color: white;
 
     &:focus {
@@ -132,11 +206,12 @@ const StyledForm = styled(Form)`
   }
 
   button[type="submit"] {
-    background-color: #FFB800;
-    border-color: #FFB800;
-    color: #00126E;
+    background-color: #ffb800;
+    border-color: #ffb800;
+    color: #00126e;
 
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       background-color: #e6a600;
       border-color: #e6a600;
     }
@@ -169,35 +244,76 @@ const NotificationItem = styled.div`
   }
 `;
 
+const InfoSection = styled.div`
+  padding: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+
+  svg {
+    margin-right: 5px;
+    font-size: 1rem;
+  }
+`;
+
 const SideBar = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isMobile, setIsMobile] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: 'info', message: 'Su plan esta por expirar' },
-    { id: 2, type: 'alert', message: 'Consumo excesivo detectado' },
-    { id: 3, type: 'info', message: 'Su plan esta por expirar' },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
 
-    window.addEventListener('resize', handleResize);
-    handleResize(); // Comprueba el tamaño inicial
+    window.addEventListener("resize", handleResize);
+    handleResize();
 
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userId = JSON.parse(localStorage.getItem("user")).id;
+
+    if (token && userId) {
+      const newSocket = io(`${import.meta.env.VITE_API_URL_WS}`, {
+        auth: { token },
+        query: { id_user: userId },
+      });
+
+      setSocket(newSocket);
+
+      newSocket.on("connect", () => {
+        console.log("Conectado al servidor de WebSocket");
+      });
+
+      newSocket.on("notification-alerts", (notification) => {
+        console.log(notification);
+        setNotifications((prevNotifications) => [
+          ...prevNotifications,
+          notification,
+        ]);
+      });
+      return () => {
+        newSocket.disconnect();
+      };
+    }
+  }, []);
+
+  const userData = JSON.parse(localStorage.getItem("user"));
 
   const toggleSidebar = () => {
     setSidebarExpanded(!sidebarExpanded);
     if (isMobile) {
-      document.body.style.overflow = sidebarExpanded ? 'auto' : 'hidden';
+      document.body.style.overflow = sidebarExpanded ? "auto" : "hidden";
     }
   };
 
@@ -207,18 +323,54 @@ const SideBar = () => {
   const handleNotificationsClose = () => setShowNotifications(false);
   const handleNotificationsShow = () => setShowNotifications(true);
 
-  const handlePasswordChange = (e) => {
+  const getToken = () => {
+    const token = localStorage.getItem("token");
+    return token;
+  };
+
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      alert('Las contraseñas nuevas no coinciden');
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Las contraseñas nuevas no coinciden",
+      });
       return;
     }
-    // Aquí iría la lógica para cambiar la contraseña
-    console.log('Contraseña cambiada');
-    // Resetear los campos después de cambiar la contraseña
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+
+    try {
+      const token = getToken();
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_URL}/user/pass`,
+        {
+          email: userData.email,
+          password: currentPassword,
+          password2: newPassword,
+        },
+        {
+          headers: {
+            "x-token-access": `${token}`,
+          },
+        }
+      );
+
+      Swal.fire({
+        icon: "success",
+        title: "¡Contraseña cambiada!",
+        text: "Tu contraseña ha sido actualizada correctamente.",
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error("Error al cambiar la contraseña:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Hubo un error al cambiar la contraseña. Por favor, inténtalo de nuevo.",
+      });
+    }
   };
 
   return (
@@ -228,44 +380,86 @@ const SideBar = () => {
           <ToggleButton onClick={toggleSidebar}>
             <FaBars />
           </ToggleButton>
-          <Navbar.Brand href="/AreaCliente" style={{fontSize:"clamp(1.5rem , 5vw , 3rem)" , marginLeft:"20px"}}> PowerWatch </Navbar.Brand>
+          <Navbar.Brand
+            href="/AreaCliente"
+            style={{
+              fontSize: "clamp(1.5rem , 5vw , 3rem)",
+              marginLeft: "20px",
+            }}
+          >
+            PowerWatch
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
               <Nav.Link>
-                <NotificationButton variant='outline-warning' onClick={handleNotificationsShow}>
+                <NotificationButton
+                  variant="outline-warning"
+                  onClick={handleNotificationsShow}
+                >
                   <FaBell size={30} />
                   {notifications.length > 0 && (
-                    <NotificationBadge bg="danger">{notifications.length}</NotificationBadge>
+                    <NotificationBadge bg="danger">
+                      {notifications.length}
+                    </NotificationBadge>
                   )}
                 </NotificationButton>
               </Nav.Link>
-              <Nav.Link><Button variant='outline-warning' onClick={handleOffcanvasShow}><FaUser size={30} /></Button></Nav.Link>
-              <Nav.Link><Button variant='outline-warning' as={Link} to="/"><FaSignOutAlt size={30} /></Button></Nav.Link>
+              <Nav.Link>
+                <Button variant="outline-warning" onClick={handleOffcanvasShow}>
+                  <FaUser size={30} />
+                </Button>
+              </Nav.Link>
+              <Nav.Link>
+                <Button
+                  variant="outline-warning"
+                  onClick={() => localStorage.clear()}
+                  as={Link}
+                  to="/"
+                >
+                  <FaSignOutAlt size={30} />
+                </Button>
+              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>
       </TopNavbar>
 
       <SidebarContainer isExpanded={sidebarExpanded}>
-        <LogoContainer className='mt-5' as={Link} to="/AreaCliente">
+        <LogoContainer className="mt-5" as={Link} to="/AreaCliente">
           <Logo src={img} alt="Logo" isExpanded={sidebarExpanded} />
         </LogoContainer>
 
         <StyledNav className="flex-column p-3">
-          <StyledButton isExpanded={sidebarExpanded} as={Link} to="/AreaCliente/Graficas">
+          <StyledButton
+            isExpanded={sidebarExpanded}
+            as={Link}
+            to="/AreaCliente/Graficas"
+          >
             <FaChartBar />
             <ButtonText isExpanded={sidebarExpanded}>Gráficas</ButtonText>
           </StyledButton>
-          <StyledButton isExpanded={sidebarExpanded} as={Link} to="/AreaCliente/Comparativa">
+          <StyledButton
+            isExpanded={sidebarExpanded}
+            as={Link}
+            to="/AreaCliente/Comparativa"
+          >
             <FaBalanceScale />
             <ButtonText isExpanded={sidebarExpanded}>Comparativas</ButtonText>
           </StyledButton>
-          <StyledButton isExpanded={sidebarExpanded} as={Link} to="/AreaCliente/Reportes">
+          <StyledButton
+            isExpanded={sidebarExpanded}
+            as={Link}
+            to="/AreaCliente/Reportes"
+          >
             <HiDocumentDownload />
             <ButtonText isExpanded={sidebarExpanded}>Reportes</ButtonText>
           </StyledButton>
-          <StyledButton isExpanded={sidebarExpanded} as={Link} to="/AreaCliente/Planes">
+          <StyledButton
+            isExpanded={sidebarExpanded}
+            as={Link}
+            to="/AreaCliente/Planes"
+          >
             <PiSubtitlesFill />
             <ButtonText isExpanded={sidebarExpanded}>Planes</ButtonText>
           </StyledButton>
@@ -275,33 +469,43 @@ const SideBar = () => {
       {isMobile && sidebarExpanded && (
         <div
           style={{
-            position: 'fixed',
+            position: "fixed",
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 1010
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 1010,
           }}
           onClick={toggleSidebar}
         />
       )}
 
-      <StyledOffcanvas show={showOffcanvas} onHide={handleOffcanvasClose} placement="end">
+      <StyledOffcanvas
+        show={showOffcanvas}
+        onHide={handleOffcanvasClose}
+        placement="end"
+      >
         <Offcanvas.Header closeButton>
           <StyledOffcanvasTitle>Información del Usuario</StyledOffcanvasTitle>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          <h4 style={{ color: '#FFB800' }}>Datos del Usuario</h4>
-          <p>Nombre: John Doe</p>
-          <p>Email: john@example.com</p>
-          
-          <h4 className="mt-4" style={{ color: '#FFB800' }}>Cambiar Contraseña</h4>
+          {userData && (
+            <>
+              <h4 style={{ color: "#FFB800" }}>Datos del Usuario</h4>
+              <p>Nombre: {userData.nombre + " " + userData.apellidos}</p>
+              <p>Email: {userData.email}</p>
+            </>
+          )}
+
+          <h4 className="mt-4" style={{ color: "#FFB800" }}>
+            Cambiar Contraseña
+          </h4>
           <StyledForm onSubmit={handlePasswordChange}>
             <Form.Group className="mb-3">
               <Form.Label>Contraseña Actual</Form.Label>
-              <Form.Control 
-                type="password" 
+              <Form.Control
+                type="password"
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
@@ -309,8 +513,8 @@ const SideBar = () => {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Nueva Contraseña</Form.Label>
-              <Form.Control 
-                type="password" 
+              <Form.Control
+                type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
@@ -318,39 +522,64 @@ const SideBar = () => {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Confirmar Nueva Contraseña</Form.Label>
-              <Form.Control 
-                type="password" 
+              <Form.Control
+                type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
             </Form.Group>
-            <Button variant="primary" type="submit" >
+            <Button variant="primary" type="submit">
               Cambiar Contraseña
             </Button>
           </StyledForm>
         </Offcanvas.Body>
       </StyledOffcanvas>
 
-      <StyledOffcanvas show={showNotifications} onHide={handleNotificationsClose} placement="end">
+      <StyledOffcanvas
+        show={showNotifications}
+        onHide={handleNotificationsClose}
+        placement="end"
+      >
         <Offcanvas.Header closeButton>
-          <StyledOffcanvasTitle>Notificaciones</StyledOffcanvasTitle>
+          <StyledOffcanvasTitle><FaBell className="mx-2"/>Notificaciones</StyledOffcanvasTitle>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          {notifications.map((notification) => (
-            <NotificationItem key={notification.id}>
-              {notification.type === 'info' ? (
-                <IoInformationCircle color="#3498db" />
-              ) : (
-                <IoWarning color="#e74c3c" />
-              )}
-              <span>{notification.message}</span>
-            </NotificationItem>
-          ))}
+          {notifications.length === 0 ? (
+            <p>No tienes notificaciones</p>
+          ) : (
+            notifications.map((notification) => (
+              <NotificationItem key={notification.id}>
+                {notification.tipo === "info" ? (
+                  <IoInformationCircle color="#3498db" />
+                ) : (
+                  <IoWarning color="#e74c3c" />
+                )}
+                <span>{notification.message}</span>
+              </NotificationItem>
+            ))
+          )}
+
+          <InfoSection>
+            <IconWrapper>
+              <IoInformationCircle size={24} color="#3498db" />
+            </IconWrapper>
+            <ContentWrapper>
+              <Title>Recibe notificaciones vía WhatsApp</Title>
+              <Description>
+                Envía un mensaje con el texto{" "}
+                <HighlightText>"join saddle-neck"</HighlightText> al número:
+              </Description>
+              <PhoneNumber>
+                <IoLogoWhatsapp size={20} color="#25D366" />
+                <span>+1 415 523 8886</span>
+              </PhoneNumber>
+            </ContentWrapper>
+          </InfoSection>
         </Offcanvas.Body>
       </StyledOffcanvas>
     </>
   );
-}
+};
 
 export default SideBar;

@@ -8,6 +8,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaUsers, FaUserPlus, FaPhone } from "react-icons/fa";
 import { MdOutlineDriveFileRenameOutline, MdEmail } from "react-icons/md";
@@ -26,6 +27,7 @@ function FormularioLogin() {
     password: "",
     confirmPassword: "",
   });
+  const navigate = useNavigate();
 
   const handleShowRegister = () => setShowModalRegister(true);
   const handleCloseRegister = () => {
@@ -53,14 +55,31 @@ function FormularioLogin() {
     handleCloseRegister();
 
     try {
-      const response = await axios.post("URL_DE_TU_API/registro", formData);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/user`, {
+        id: "",
+        nombre: formData.name,
+        apellidos: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        telefono: formData.phone,
+        fechaPlan: null,
+      });
       if (response.status === 200) {
         console.log("Usuario registrado exitosamente");
+        localStorage.setItem("token", response.data.token);
       } else {
-        console.error("Error al registrar usuario");
+        MySwal.fire(
+          "Error",
+          "Error al registrar usuario. Por favor, inténtalo de nuevo.",
+          "error"
+        );
       }
     } catch (error) {
-      console.error("Error de red:", error);
+      MySwal.fire(
+        "Error",
+        "Error de red al intentar registrar usuario. Por favor, inténtalo de nuevo más tarde.",
+        "error"
+      );
     }
   };
 
@@ -70,87 +89,109 @@ function FormularioLogin() {
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post("URL_DE_TU_API/login", {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/user/login`, {
         email,
         password,
       });
-      console.log(response.data);
-      // Maneja la respuesta de la API (ej. guardar token, redirigir usuario, etc.)
+
+      if (response.status === 200) {
+        console.log(response);
+        const token = response.headers["x-token-access"];
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.data));
+        navigate("/AreaCliente");
+      }
     } catch (error) {
-      console.error("Error en la autenticación", error);
-      // Maneja el error (ej. mostrar mensaje de error al usuario)
+      if (error.response && error.response.status === 401) {
+        MySwal.fire(
+          "Error de autenticación",
+          "Credenciales incorrectas. Por favor, inténtalo de nuevo.",
+          "error"
+        );
+      } else {
+        MySwal.fire(
+          "Error",
+          "Ocurrió un error al intentar iniciar sesión. Por favor, inténtalo más tarde.",
+          "error"
+        );
+      }
     }
   };
 
   const handleSendEmail = () => {
     axios
-      .post("URL_DE_TU_API/forgot-password", { email })
+      .post(`${import.meta.env.VITE_API_URL}/user/recoverpass`, { email })
       .then((response) => {
+        console.log(response.data);
         MySwal.fire(
           "Correo enviado",
           "Revisa tu bandeja de entrada para más instrucciones",
           "success"
         );
-        setShowModalForgotPassword(false); // Cierra el modal después de enviar el correo
+        setShowModalForgotPassword(false);
       })
       .catch((error) => {
-        MySwal.fire("Error", "No se pudo enviar el correo", "error");
+        MySwal.fire(
+          "Error",
+          error.response.data.messages,
+          "error"
+        );
       });
   };
 
   const styles = {
     navbar: {
-      background: 'linear-gradient(45deg, #00126E, #001F9C)',
-      padding: '0.5rem 1rem',
+      background: "linear-gradient(45deg, #00126E, #001F9C)",
+      padding: "0.5rem 1rem",
     },
     brand: {
-      fontSize: 'clamp(1.5rem, 4vw, 2.5rem)',
-      fontWeight: '600',
-      color: '#ffffff',
-      display: 'flex',
-      alignItems: 'center',
+      fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
+      fontWeight: "600",
+      color: "#ffffff",
+      display: "flex",
+      alignItems: "center",
     },
     logo: {
-      width: '60px',
-      height: '60px',
-      marginRight: '10px',
+      width: "60px",
+      height: "60px",
+      marginRight: "10px",
     },
     navButton: {
-      borderRadius: '10px',
-      padding: '0.5rem 1rem',
-      fontSize: '0.9rem',
-      fontWeight: '600',
-      transition: 'all 0.3s ease',
+      borderRadius: "10px",
+      padding: "0.5rem 1rem",
+      fontSize: "0.9rem",
+      fontWeight: "600",
+      transition: "all 0.3s ease",
     },
     modal: {
       header: {
-        background: 'linear-gradient(45deg, #FFB800, #FFA000)',
-        border: 'none',
+        background: "linear-gradient(45deg, #FFB800, #FFA000)",
+        border: "none",
       },
       title: {
-        color: '#ffffff',
-        fontSize: '1.5rem',
-        fontWeight: '700',
+        color: "#ffffff",
+        fontSize: "1.5rem",
+        fontWeight: "700",
       },
       body: {
-        background: 'linear-gradient(45deg, #001F9C, #00126E)',
-        color: '#ffffff',
-        padding: '2rem',
+        background: "linear-gradient(45deg, #001F9C, #00126E)",
+        color: "#ffffff",
+        padding: "2rem",
       },
       input: {
-        borderRadius: '10px',
-        border: 'none',
-        padding: '0.75rem',
-        marginBottom: '1rem',
+        borderRadius: "10px",
+        border: "none",
+        padding: "0.75rem",
+        marginBottom: "1rem",
       },
       submitButton: {
-        background: 'linear-gradient(45deg, #FFB800, #FFA000)',
-        border: 'none',
-        borderRadius: '20px',
-        padding: '0.75rem 2rem',
-        fontSize: '1rem',
-        fontWeight: '600',
-        transition: 'all 0.3s ease',
+        background: "linear-gradient(45deg, #FFB800, #FFA000)",
+        border: "none",
+        borderRadius: "20px",
+        padding: "0.75rem 2rem",
+        fontSize: "1rem",
+        fontWeight: "600",
+        transition: "all 0.3s ease",
       },
     },
   };
@@ -158,22 +199,19 @@ function FormularioLogin() {
   return (
     <div
       className="d-flex flex-column align-items-center"
-      style={{ width: "90%", padding: "0.5rem", color: "#ffff" }}
-    >
+      style={{ width: "90%", padding: "0.5rem", color: "#ffff" }}>
       <Button
         variant="outline-light"
         as={Link}
         to="/"
         className="align-self-start m-3"
-        style={{ border: "none" }}
-      >
+        style={{ border: "none" }}>
         <IoMdArrowRoundBack size={30} />
       </Button>
 
       <h1
         className="mb-4"
-        style={{ color: "#ffff", fontSize: "clamp(2rem , 5vw, 4rem)" }}
-      >
+        style={{ color: "#ffff", fontSize: "clamp(2rem , 5vw, 4rem)" }}>
         Inicio de sesión
       </h1>
       <Form onSubmit={handleLogin} style={{ width: "100%" }}>
@@ -207,28 +245,42 @@ function FormularioLogin() {
           <Button
             type="submit"
             variant="dark"
-            as={Link}
-            to="/AreaCliente"
             style={{
               backgroundColor: "#00126E",
               width: "70%",
               fontSize: "20pt",
               padding: "1rem",
-            }}
-          >
+            }}>
             Aceptar
           </Button>
         </div>
       </Form>
 
       {/* Modal para recuperar contraseña */}
-      <Modal show={showModalForgotPassword} onHide={handleCloseForgotPassword} size="lg" centered>
-        <Modal.Header closeButton style={{ backgroundColor: "#FFB800", textAlign: "center" }}>
-          <Modal.Title style={{color:"#ffff"}}>Recuperar Contraseña</Modal.Title>
+      <Modal
+        show={showModalForgotPassword}
+        onHide={handleCloseForgotPassword}
+        size="lg"
+        centered>
+        <Modal.Header
+          closeButton
+          style={{ backgroundColor: "#FFB800", textAlign: "center" }}>
+          <Modal.Title style={{ color: "#ffff" }}>
+            Recuperar Contraseña
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ backgroundColor: "#00126E", color: "white", padding: "5%", fontSize: "15pt" }}>
+        <Modal.Body
+          style={{
+            backgroundColor: "#00126E",
+            color: "white",
+            padding: "5%",
+            fontSize: "15pt",
+          }}>
           <Form.Group controlId="formBasicEmailModal">
-            <Form.Label> <MdEmail /> Ingrese su email</Form.Label>
+            <Form.Label>
+              {" "}
+              <MdEmail /> Ingrese su email
+            </Form.Label>
             <Form.Control
               type="email"
               placeholder="Email"
@@ -237,7 +289,13 @@ function FormularioLogin() {
             />
           </Form.Group>
         </Modal.Body>
-        <Modal.Footer style={{ backgroundColor: "#00126E", color: "white", padding: "5%", fontSize: "15pt" }}>
+        <Modal.Footer
+          style={{
+            backgroundColor: "#00126E",
+            color: "white",
+            padding: "5%",
+            fontSize: "15pt",
+          }}>
           <Button variant="secondary" onClick={handleCloseForgotPassword}>
             Cancelar
           </Button>
@@ -248,7 +306,11 @@ function FormularioLogin() {
       </Modal>
 
       {/* Modal para registro */}
-      <Modal show={showModalRegister} onHide={handleCloseRegister} centered size="lg">
+      <Modal
+        show={showModalRegister}
+        onHide={handleCloseRegister}
+        centered
+        size="lg">
         <Modal.Header closeButton style={styles.modal.header}>
           <Modal.Title style={styles.modal.title}>
             <FaUserPlus /> Registro de Cliente
@@ -257,15 +319,35 @@ function FormularioLogin() {
         <Modal.Body style={styles.modal.body}>
           <Form onSubmit={handleRegisterSubmit}>
             {[
-              { id: "name", label: "Nombres", icon: <MdOutlineDriveFileRenameOutline /> },
-              { id: "lastName", label: "Apellidos", icon: <MdOutlineDriveFileRenameOutline /> },
+              {
+                id: "name",
+                label: "Nombres",
+                icon: <MdOutlineDriveFileRenameOutline />,
+              },
+              {
+                id: "lastName",
+                label: "Apellidos",
+                icon: <MdOutlineDriveFileRenameOutline />,
+              },
               { id: "phone", label: "Teléfono", icon: <FaPhone /> },
               { id: "email", label: "Email", icon: <MdEmail /> },
-              { id: "password", label: "Contraseña", icon: <RiLockPasswordFill />, type: "password" },
-              { id: "confirmPassword", label: "Confirmar Contraseña", icon: <RiLockPasswordFill />, type: "password" },
+              {
+                id: "password",
+                label: "Contraseña",
+                icon: <RiLockPasswordFill />,
+                type: "password",
+              },
+              {
+                id: "confirmPassword",
+                label: "Confirmar Contraseña",
+                icon: <RiLockPasswordFill />,
+                type: "password",
+              },
             ].map((field) => (
               <Form.Group key={field.id} controlId={field.id}>
-                <Form.Label>{field.icon} {field.label}</Form.Label>
+                <Form.Label>
+                  {field.icon} {field.label}
+                </Form.Label>
                 <Form.Control
                   type={field.type || "text"}
                   placeholder={`Ingrese ${field.label.toLowerCase()}`}
@@ -288,7 +370,7 @@ function FormularioLogin() {
           className="mt-3 mr-3"
           variant="link"
           style={{ color: "#ffff", fontSize: "1rem" }}
-          onClick={handleShowRegister} // Mostrar el modal de registro
+          onClick={handleShowRegister} 
         >
           Registrarse
         </Button>
@@ -296,8 +378,7 @@ function FormularioLogin() {
           className="mt-3"
           variant="link"
           style={{ color: "#ffff", fontSize: "1rem" }}
-          onClick={handleShowForgotPassword}
-        >
+          onClick={handleShowForgotPassword}>
           ¿Ha olvidado su contraseña?
         </Button>
       </div>
