@@ -3,6 +3,7 @@ import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Image } from '
 import styled, { createGlobalStyle } from 'styled-components';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import axios from 'axios';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -115,7 +116,7 @@ const Td = styled.td`
 `;
 
 const InfoText = styled.p`
-  font-size: 1.1em;
+  font-size: 1.5rem;
   color: #4a5568;
   margin-bottom: 10px;
 `;
@@ -148,9 +149,9 @@ const styles = StyleSheet.create({
     color: '#333333',
   },
   image: {
-    marginVertical: 35,
+    marginVertical: 5,
     width: "300px",
-    marginHorizontal:90,
+    marginHorizontal:80,
   },
   header: {
     fontSize: 18,
@@ -194,43 +195,157 @@ const styles = StyleSheet.create({
   },
 });
 
+const apiRoutes = {
+  incidencias: `${import.meta.env.VITE_API_URL}/data/incidencias`,
+  consumoMes: `${import.meta.env.VITE_API_URL}/data/consumoMes`,
+};
+
 const Report = () => {
   const [reportData, setReportData] = useState(null);
   const [damageProbs, setDamageProbs] = useState(null);
   const pieChartRef = useRef(null);
   const [pieChartImage, setPieChartImage] = useState(null);
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const date = new Date();
+    return date.toLocaleString('en-US', { month: 'long' });
+  });
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = {
-        consumptionType: "Medio",
-        averageConsumption: 450,
-        monthlyConsumption: [420, 440, 460, 430, 470, 450],
-        disconnectionEvents: 3,
-        powerSpikeEvents: 2,
-        observationMonths: 6
-      };
-      setReportData(data);
+      const id_user = JSON.parse(localStorage.getItem("user")).id;
+      const token = localStorage.getItem("token");
 
-      const lambdaD = data.disconnectionEvents / data.observationMonths;
-      const lambdaP = data.powerSpikeEvents / data.observationMonths;
+      try {
+        const [incidenciasResponse, consumoMesResponse] = await Promise.all([
+          axios.get(`${apiRoutes.incidencias}/${id_user}`, {
+            headers: {
+              "x-token-access": token,
+            }
+          }),
+          axios.get(`${apiRoutes.consumoMes}/${id_user}`, {
+            headers: {
+              "x-token-access": token,
+            }
+          }),
+        ]);
 
-      const calculateDamageProb = (a, b) => {
-        const F = a * lambdaD + b * lambdaP;
-        return 1 - Math.exp(-F);
-      };
+    
+        if (incidenciasResponse.status === 200 && consumoMesResponse.status === 200) {
+          const incidenciasData = incidenciasResponse.data.data;
+          const consumoMesData = consumoMesResponse.data.data;
 
-      const probs = {
-        low: calculateDamageProb(0.5, 0.3),
-        medium: calculateDamageProb(1, 0.7),
-        high: calculateDamageProb(1.5, 1)
-      };
+     
+          const filteredIncidencias = incidenciasData.filter(
+            (incidencia) => incidencia.mes === currentMonth
+          );
+         
+          const filteredConsumoMes = consumoMesData.find(
+            (data) => data.mes === currentMonth
+          );
 
-      setDamageProbs(probs);
+       
+          const totalDesconexiones = filteredIncidencias.filter(
+            (incidencia) => incidencia.tipo === 'DESCONEXION'
+          ).reduce((acc, incidencia) => acc + incidencia.total, 0);
+
+          const totalPicos = filteredIncidencias.filter(
+            (incidencia) => incidencia.tipo === 'PICO'
+          ).reduce((acc, incidencia) => acc + incidencia.total, 0);
+
+      
+          const averageConsumption = filteredConsumoMes?.total_consumokwh || 0;
+
+    
+          let consumptionType;
+          if (averageConsumption > 650) {
+            consumptionType = 'Alto';
+          } else if (averageConsumption > 250) {
+            consumptionType = 'Medio';
+          } else {
+            consumptionType = 'Bajo';
+          }
+
+        
+          const data = {
+            consumptionType,
+            averageConsumption,
+            monthlyConsumption: [averageConsumption], 
+            disconnectionEvents: totalDesconexiones,
+            powerSpikeEvents: totalPicos,
+            observationMonths: 12 
+          };
+
+       
+
+          setReportData(data);
+          calculateDamageProbabilities(data);
+        } else {
+          console.error("Error en la respuesta de la API:", incidenciasResponse.status, consumoMesResponse.status);
+       
+        }
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+  
+      }
     };
 
     fetchData();
-  }, []);
+  }, [currentMonth]); 
+
+  const factorial = (n) => {
+    if (n === 0) return 1;
+    return n * factorial(n - 1);
+  };
+
+  const calculateDamageProbabilities = (data) => {
+    const lambdaD = data.disconnectionEvents / data.observationMonths;
+    const lambdaP = data.powerSpikeEvents / data.observationMonths;
+
+    const probabilityDisconnection = (k) => {
+      return (Math.pow(lambdaD, k) * Math.exp(-lambdaD)) / factorial(k); 
+    };
+
+    const probabilityPowerSpike = (k) => {
+      return (Math.pow(lambdaP, k) * Math.exp(-lambdaP)) / factorial(k); 
+    };
+
+    const calculateDamageProb = (a, b, kD, kP) => {
+      const probD = probabilityDisconnection(kD); 
+      const probP = probabilityPowerSpike(kP);
+      const F = a * probD + b * probP;
+      return 1 - Math.exp(-F); 
+    }; 
+
+    const sensitivityCoefficients = {
+      "Bajo": { a: 0.05, b: 0.1 },
+      "Medio": { a: 0.1, b: 0.2 },
+      "Alto": { a: 0.15, b: 0.3 }
+    };
+
+    const probs = {
+      low: calculateDamageProb(
+        sensitivityCoefficients[data.consumptionType].a,
+        sensitivityCoefficients[data.consumptionType].b,
+        0, 
+        0 
+      ),
+      medium: calculateDamageProb(
+        sensitivityCoefficients[data.consumptionType].a,
+        sensitivityCoefficients[data.consumptionType].b,
+        1, 
+        1 
+      ),
+      high: calculateDamageProb(
+        sensitivityCoefficients[data.consumptionType].a,
+        sensitivityCoefficients[data.consumptionType].b,
+        2,
+        2
+      )
+    };
+
+    setDamageProbs(probs);
+  };
 
   useEffect(() => {
     if (pieChartRef.current) {
@@ -337,7 +452,7 @@ const ReportPDF = ({ data, damageProbs, pieChartImage }) => (
           </View>
         </View>
 
-        {pieChartImage && <Image style={styles.image} src={pieChartImage} />}
+        {pieChartImage && <Image style={styles.image} src={pieChartImage}/>}
 
         <Text style={styles.header}>Sugerencias de Mejora</Text>
         <View style={styles.suggestions}>
