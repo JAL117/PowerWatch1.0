@@ -23,8 +23,8 @@ ChartJS.register(
 
 const GlobalStyle = createGlobalStyle`
   html, body, #root {
-    height: 80%;
-    margin: 0;
+    height: 90%;
+    margin: 0px;
     padding: 0px;
     font-family: 'Roboto', sans-serif;
     background-color: #f0f4f8;
@@ -35,8 +35,8 @@ const ComparativaContainer = styled.div`
   background-color: #ffffff;
   padding: 40px;
   border-radius: 20px;
-  width: 100%;
-  height: 80vh; 
+  width: 80%;
+  height: 83vh; 
   max-width: 1600px;
   margin: 40px auto;
   display: flex;
@@ -69,14 +69,14 @@ const TitleMain = styled.h2`
 const ContentContainer = styled.div`
   display: flex;
   flex-grow: 1;
-  gap: 40px;
+  gap: 30px;
   @media (max-width: 1024px) {
     flex-direction: column;
   }
 `;
 
 const ChartContainer = styled.div`
-  flex: 2;
+  flex: 1;
   background-color: #ffffff;
   padding: 0px;
   border-radius: 15px;
@@ -91,7 +91,7 @@ const ChartContainer = styled.div`
   }
 
   @media (max-width: 768px) {
-    padding: 25px;
+    padding: 45px;
   }
 `;
 
@@ -120,7 +120,7 @@ const FormContainer = styled.div`
 const InputGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
 
   @media (max-width: 768px) {
     flex-direction: column;

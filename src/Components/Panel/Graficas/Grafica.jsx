@@ -244,7 +244,7 @@ const Grafica = () => {
   const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+   const token = localStorage.getItem("token");
     const userId = JSON.parse(localStorage.getItem("user")).id;
 
     if (userId) {
@@ -309,7 +309,7 @@ const Grafica = () => {
     }
   }, []);
 
-  const id_user = JSON.parse(localStorage.getItem("user")).id;
+const id_user = JSON.parse(localStorage.getItem("user")).id;
   const token = localStorage.getItem("token");
 
   useEffect(() => {
